@@ -13,7 +13,7 @@ The installer builds a patched copy from the original executable already on your
 | Three or five simultaneous fingers | Not implemented |
 | Other CarPlay executable hashes | Refused by the installer |
 
-The tested MGU reported `P18_23w44.2-1-3`. Model year, vehicle model, or the label �iDrive 7� does not establish compatibility. The original `/usr/bin/carplay` must have both:
+The tested MGU reported `P18_23w44.2-1-3`. Model year, vehicle model, or the label “iDrive 7” does not establish compatibility. The original `/usr/bin/carplay` must have both:
 
 - Size: **3,484,912 bytes**
 - SHA-256: **`ddb33e33161387c6479c391684b3d019b0de54ecfcee8d6877eca94aa62f3e50`**
@@ -21,6 +21,8 @@ The tested MGU reported `P18_23w44.2-1-3`. Model year, vehicle model, or the lab
 The resulting copy must have SHA-256 `2a009e6afe22f8f385b164ec9e2a7c2aa22b1c1c3ac2110d04f80715dc2c01de`. The installer checks these identities instead of guessing from a vehicle model.
 
 ## Requirements
+
+**Root/SSH access to the MGU is required before using this installer.** For setup instructions, see [idrive7-8-ssh-root](https://github.com/cauliflowermossgrape/idrive7-8-ssh-root#readme) by [cauliflowermossgrape](https://github.com/cauliflowermossgrape). Follow the author's compatibility and coding-backup instructions before enabling access.
 
 - An MGU with working **root SSH access already enabled**, and Node.js 8 available on the MGU.
 - A computer with **Python 3.8+** and the OpenSSH client. The installer uses Python's standard library.
