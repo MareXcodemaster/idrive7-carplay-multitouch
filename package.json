@@ -1,0 +1,17 @@
+{
+  "name": "idrive7-carplay-multitouch",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Exact-version two-finger CarPlay patch for BMW iDrive 7 MGU",
+  "license": "MIT",
+  "engines": {
+    "node": ">=8"
+  },
+  "scripts": {
+    "test": "node tests/patcher.test.js && node tests/agent.test.js && node runtime/test-manager.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MareXcodemaster/idrive7-carplay-multitouch.git"
+  }
+}

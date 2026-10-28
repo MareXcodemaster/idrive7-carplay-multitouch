@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "node": "v8.16.2",
+  "checks": [
+    "matches confirmed vehicle-tested executable byte for byte",
+    "original input remains unchanged",
+    "identity verification recognizes only exact inputs",
+    "modified input is refused",
+    "truncated input and reapplication are refused",
+    "incorrect expected replacement bytes are refused",
+    "changed replacement and payload are refused by result hash",
+    "overlapping, unsorted and out-of-range edits are refused",
+    "invalid hex, base64, hashes and sizes are refused",
+    "CLI creates a copy and refuses existing output",
+    "CLI check recognizes original and candidate, rejects unrelated file"
+  ],
+  "candidateSha256": "2a009e6afe22f8f385b164ec9e2a7c2aa22b1c1c3ac2110d04f80715dc2c01de",
+  "scope": "Local fixtures only; no vehicle or network access. The public package does not contain fixture firmware."
+}

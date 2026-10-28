@@ -1,0 +1,46 @@
+# Dependencies and caches
+node_modules/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Local configuration, authentication and diagnostics
+.env
+.env.*
+!.env.example
+known_hosts*
+id_rsa*
+id_ed25519*
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
+local-*.json
+session-*.json
+status-*.json
+
+# Never publish local firmware fixtures, dumps or generated executables
+carplay
+carplay.original
+carplay-mt-test
+carplay-multitouch
+original.bin
+candidate.bin
+*.tar
+*.tar.gz
+*.tgz
+*.img
+*.qcow2
+*.core
+*.core.gz
+*.zip
+work/
+firmware/
+backups/
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
