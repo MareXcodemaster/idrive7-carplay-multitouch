@@ -12,9 +12,8 @@ The installer builds a patched copy from the original executable already on your
 | Factory CarPlay connected directly to an iPhone | **Not tested** |
 | Three or five simultaneous fingers | Not implemented |
 | Other CarPlay executable hashes | Refused by the installer |
-| iDrive 8 | Unsupported |
 
-The tested MGU reported `P18_23w44.2-1-3`. Model year, vehicle model, or the label “iDrive 7” does not establish compatibility. The original `/usr/bin/carplay` must have both:
+The tested MGU reported `P18_23w44.2-1-3`. Model year, vehicle model, or the label �iDrive 7� does not establish compatibility. The original `/usr/bin/carplay` must have both:
 
 - Size: **3,484,912 bytes**
 - SHA-256: **`ddb33e33161387c6479c391684b3d019b0de54ecfcee8d6877eca94aa62f3e50`**
