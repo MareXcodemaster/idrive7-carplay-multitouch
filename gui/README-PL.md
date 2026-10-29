@@ -1,4 +1,4 @@
-# Instalator GUI — dwa palce w CarPlay iDrive 7
+# Instalator GUI — CarPlay Multitouch dla iDrive 7
 
 Język domyślny to angielski; przycisk **English / PL** przełącza na polski.
 
@@ -10,6 +10,33 @@ Uruchom `iDrive7-Multitouch-Installer.exe` na Windows 10/11 z .NET Framework 4.8
 4. Wybierz folder kopii. Potwierdź postój i stabilne zasilanie. Instalacja wymaga odczytu co najmniej 13,0 V.
 5. Kliknij **Zainstaluj**. Najpierw powstanie kopia na komputerze; jej pliki zostaną sprawdzone sumami SHA-256. Błąd kopii zatrzyma operację przed instalacją.
 6. Domyślnie aplikacja zleci pełny restart MGU i sprawdzi rozruch. Kontrola poprawki trwa 60 sekund od uruchomienia CarPlay. Android box może wymagać osobnego restartu, aby połączyć się ponownie.
+
+## Instalacja ze screenami
+
+Poniższe screeny pochodzą z aktualnego programu. Widok gotowości zawiera dane
+przykładowe; nie jest potwierdzeniem połączenia z Twoim autem.
+
+**1. Połącz i sprawdź.** Po podłączeniu ENET uruchom program. Pozostaw automatyczne
+wykrywanie IP i klucza albo wskaż własny `id_rsa`. Wybierz **Połącz i sprawdź**;
+instalacja odblokuje się po potwierdzeniu roota i zgodności oprogramowania.
+
+![Ekran startowy programu CarPlay Multitouch](screenshots/windows-start-pl.png)
+
+**2. W razie potrzeby wskaż klucz.** **Gdzie jest klucz?** pokazuje ścieżkę z
+narzędzia autora. Wybierz `id_rsa` bez rozszerzenia, nie plik `.pub`.
+
+![Pomoc w wyborze klucza SSH](screenshots/windows-key-pl.png)
+
+**3. Wybierz folder kopii i zainstaluj.** Po udanym sprawdzeniu wybierz folder
+kopii, potwierdź postój i stabilne zasilanie, następnie **Zainstaluj**. Kopia jest
+tworzona i weryfikowana przed zmianą. Pozostaw włączone **Restart i kontrola po
+operacji** i poczekaj na wynik kontroli po restarcie.
+
+![Przykładowy widok gotowości do instalacji CarPlay Multitouch](screenshots/windows-ready-pl.png)
+
+**4. Cofnięcie zmiany.** Po ponownym połączeniu użyj **Usuń poprawkę** i pozostaw
+restart z kontrolą włączony. **Przywróć kopię** służy do odtworzenia poprzedniego
+stanu tej poprawki, a **Otwórz kopie** pokaże zapisane archiwa na komputerze.
 
 Nie generuj nowego klucza tylko po to, aby użyć instalatora. Po udanym Enable SSH / Flash narzędzie eksportuje klucz akceptowany przez tę jednostkę — standardowo `data/enrollments/<VIN>/id_rsa`. Nowa niezarejestrowana para kluczy nie da dostępu.
 
@@ -36,7 +63,7 @@ Kopia `.mgubak` obejmuje **oryginalny program CarPlay, fabryczną jednostkę sys
 **To nie jest pełny obraz ani kopia kodowania całego MGU.** Nie przywróci uszkodzonego firmware'u, bootloadera ani innych funkcji jednostki. Instalator pozostawia fabryczny `/usr/bin/carplay` nienaruszony.
 
 - **Usuń poprawkę** tworzy kopię bieżącego stanu i usuwa wyłącznie własną instalację. Po restarcie wraca fabryczny CarPlay.
-- **Przywróć kopię** sprawdza sumy, wersję i zgodność VIN z autem wykrytym przez ENET. Odtwarza poprzedni stan instalacji tej poprawki: fabryczny albo z włączoną poprawką dwóch palców. Nie wgrywa dowolnych plików z archiwum do systemu.
+- **Przywróć kopię** sprawdza sumy, wersję i zgodność VIN z autem wykrytym przez ENET. Odtwarza poprzedni stan instalacji tej poprawki: fabryczny albo z włączonym CarPlay Multitouch. Nie wgrywa dowolnych plików z archiwum do systemu.
 - **Zrób kopię** pozwala zapisać ją także osobno, bez instalacji.
 - Nie usuwaj kopii z komputera przed sprawdzeniem działania. Przycisk **Otwórz kopie** pokazuje folder.
 
@@ -56,4 +83,4 @@ Inny hash lub obca konfiguracja usługi blokują instalację. Sam model/rocznik 
 
 ## Sprawdzenie nowego GUI
 
-Przeszły testy lokalne kopii, przywracania, parserów ENET, argumentów Windows i ograniczeń danych. Pełny przebieg nowego GUI wymaga jeszcze próby na aucie; sama poprawka dwóch palców oraz bazowy mechanizm instalacji/usunięcia były już sprawdzane.
+Przeszły testy lokalne kopii, przywracania, parserów ENET, argumentów Windows i ograniczeń danych. Pełny przebieg nowego GUI wymaga jeszcze próby na aucie; sama poprawka CarPlay Multitouch oraz bazowy mechanizm instalacji/usunięcia były już sprawdzane.

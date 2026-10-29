@@ -77,7 +77,7 @@ public class MainForm:Form {
  void Cues(){if(key.IsHandleCreated)SendMessage(key.Handle,0x1501,IntPtr.Zero,T("Auto — klucz dla VIN / agent SSH","Auto — VIN key / SSH agent"));if(host.IsHandleCreated)SendMessage(host.Handle,0x1501,IntPtr.Zero,T("Automatyczne wykrywanie ENET","Automatic ENET discovery"));}
  void Translate(){
   language.Text=en?"English / PL":"Polski / EN";hostCaption.Text=T("IP MGU (auto)","MGU IP (auto)");keyCaption.Text=T("Klucz SSH (opcjonalny)","SSH key (optional)");backupCaption.Text=T("Folder kopii","Backup folder");
-  subtitle.Text=T("Dwa palce · ENET · sprawdzenie roota · kopia przed każdą zmianą","Two fingers · ENET · root check · backup before every change");
+  subtitle.Text=T("Multitouch · ENET · sprawdzenie roota · kopia przed każdą zmianą","Multitouch · ENET · root check · backup before every change");
   keyHelp.Text=T("Gdzie jest klucz?","Where is my key?");rootLink.Text=T("Instrukcja root / SSH autora na GitHubie ↗","Author's root / SSH setup guide on GitHub ↗");
   connect.Text=T("Połącz i sprawdź","Connect and check");pickKey.Text=T("Wybierz plik…","Choose file…");pickFolder.Text=T("Wybierz folder…","Choose folder…");install.Text=T("Zainstaluj","Install");remove.Text=T("Usuń poprawkę","Uninstall");restore.Text=T("Przywróć kopię","Restore backup");save.Text=T("Zrób kopię","Create backup");open.Text=T("Otwórz kopie","Open backups");
   ready.Text=T("Auto zaparkowane, stabilne zasilanie ≥13 V","Vehicle parked, stable supply ≥13 V");activate.Text=T("Restart i kontrola po operacji","Reboot and verify afterwards");
@@ -110,7 +110,7 @@ public class MainForm:Form {
   voltage.Text=value!=null&&value.ContainsKey("STAT_MILLI_VOLT_WERT")?(Convert.ToDouble(value["STAT_MILLI_VOLT_WERT"])/1000).ToString("0.0")+" V":"— V";
   voltage.ForeColor=value!=null&&value.ContainsKey("STAT_MILLI_VOLT_WERT")&&Convert.ToInt32(value["STAT_MILLI_VOLT_WERT"])>=13000?Color.FromArgb(30,122,83):Color.FromArgb(174,93,24);
   if(!Json.Bool(p,"supported")){state.Text=T("Root OK · niezgodna wersja MGU — instalacja zablokowana.","Root OK · unsupported MGU build — installation blocked.");state.ForeColor=Color.FromArgb(174,93,24);Log(Json.Str(p,"compatibilityError"));}
-  else if(Json.Bool(s,"activePatched")&&Json.Obj(s,"pending")==null&&Json.Bool(Json.Obj(s,"health"),"verified")){state.Text=T("Root OK · zgodna wersja · dwa palce zainstalowane i sprawdzone.","Root OK · compatible build · two-finger patch installed and health verified.");state.ForeColor=Color.FromArgb(30,122,83);}
+  else if(Json.Bool(s,"activePatched")&&Json.Obj(s,"pending")==null&&Json.Bool(Json.Obj(s,"health"),"verified")){state.Text=T("Root OK · zgodna wersja · CarPlay Multitouch zainstalowany i sprawdzony.","Root OK · compatible build · CarPlay Multitouch installed and health verified.");state.ForeColor=Color.FromArgb(30,122,83);}
   else if(Json.Obj(s,"disabled")!=null){state.Text=T("Root OK · poprawka wyłączona przez zabezpieczenie. Można usunąć lub ponowić instalację.","Root OK · guard disabled the patch. Uninstall or retry installation.");state.ForeColor=Color.FromArgb(174,93,24);}
   else{state.Text=T("Root OK · zgodna wersja. Zmiana zapisana na dysku może wymagać restartu.","Root OK · compatible build. A change saved on disk may require reboot.");state.ForeColor=muted;}
   state.Text+=T("  iPhone bezpośrednio: niesprawdzone.","  Direct iPhone CarPlay: untested.");
@@ -121,17 +121,27 @@ public class MainForm:Form {
   bool healthy=connected&&Json.Bool(s,"activePatched")&&Json.Obj(s,"disabled")==null&&Json.Obj(s,"pending")==null&&Json.Bool(Json.Obj(s,"health"),"verified");install.Text=healthy?T("Zainstalowano","Installed"):T("Zainstaluj","Install");save.Enabled=!busy&&supported;install.Enabled=!busy&&supported&&ready.Checked&&!healthy;remove.Enabled=!busy&&connected&&Json.Bool(s,"installed")&&ready.Checked;restore.Enabled=!busy&&supported&&ready.Checked;open.Enabled=!busy;
  }
  public void RenderPreview(string path){
-  previewMode=true;en=true;Translate();
-  host.Text="169.254.50.55";key.Text=@"C:\Klucze\BMW\id_rsa";backup.Text=@"C:\Kopie\iDrive7";ready.Checked=true;
+  RenderPreview(path,true,"ready");
+ }
+ public void RenderPreview(string path,bool english,string stage){
+  previewMode=true;en=english;Translate();
+  host.Text="";key.Text="";backup.Text=@"C:\Backups\iDrive7";ready.Checked=false;activate.Checked=true;log.Clear();
+  Log(T("PODGLĄD INSTRUKCJI — dane przykładowe, bez połączenia z autem.","GUIDE PREVIEW — example data; no vehicle connection."));
+  if(stage=="ready"){
+  host.Text="169.254.50.55";key.Text=@"C:\Keys\BMW\id_rsa";ready.Checked=true;
   connection.Text=T("ENET połączony   ·   root potwierdzony","ENET connected   ·   root verified");state.Text=T("Zgodna wersja MGU · kopia będzie zapisana przed instalacją","Compatible MGU build · backup will be saved before installation");voltage.Text="14.4 V";voltage.ForeColor=Color.FromArgb(30,122,83);step.Text=T("Gotowy do instalacji CarPlay Multitouch dla iDrive 7","Ready to install CarPlay Multitouch for iDrive 7");
   Log(T("ENET → MGU: połączenie sprawdzone","ENET → MGU: connection verified"));Log(T("SSH: UID 0 (root) potwierdzony","SSH: UID 0 (root) verified"));Log(T("Wersja fabrycznego CarPlay zgodna z poprawką","Factory CarPlay software matches the patch"));
-  foreach(var b in new[]{install,remove,restore,save})b.Enabled=true;Show();Application.DoEvents();using(var bitmap=new Bitmap(Width,Height)){DrawToBitmap(bitmap,new Rectangle(0,0,Width,Height));bitmap.Save(path,System.Drawing.Imaging.ImageFormat.Png);}Close();
+  foreach(var b in new[]{install,remove,restore,save})b.Enabled=true;
+  }
+  Show();Application.DoEvents();using(var bitmap=new Bitmap(Width,Height)){DrawToBitmap(bitmap,new Rectangle(0,0,Width,Height));bitmap.Save(path,System.Drawing.Imaging.ImageFormat.Png);}Close();
  }
 }
 static class Program {
  [STAThread] static int Main(string[] args){
   Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
   if(args.Length==2&&args[0]=="--render-key-help"){using(var f=new KeyHelpForm(true))f.RenderPreview(args[1]);return 0;}
+  if(args.Length==2&&args[0]=="--render-key-help-pl"){using(var f=new KeyHelpForm(false))f.RenderPreview(args[1]);return 0;}
+  if(args.Length==4&&args[0]=="--render-guide"){using(var f=new MainForm())f.RenderPreview(args[1],args[2]!="pl",args[3]);return 0;}
   if(args.Length==2&&args[0]=="--render"){using(var f=new MainForm())f.RenderPreview(args[1]);return 0;}
   Application.Run(new MainForm());return 0;
  }

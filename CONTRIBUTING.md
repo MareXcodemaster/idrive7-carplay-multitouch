@@ -14,7 +14,7 @@ The public tests use synthetic buffers and do not need a vehicle, root access, o
 
 ## Receiver testing
 
-For a direct iPhone test, report the iOS version, map application and version, MGU software version, and original CarPlay executable SHA-256. State whether the connection was directly from the iPhone to factory BMW CarPlay or through a box. Check one-finger taps, two-finger pinch, independent releases, and whether ordinary controls still work. A video of the gesture is useful if it contains no private information.
+For a direct iPhone test, report the iOS version, map application and version, MGU software version, and original CarPlay executable SHA-256. State whether the connection was directly from the iPhone to factory BMW CarPlay or through a box. Check ordinary taps, multitouch pinch-to-zoom, independent releases, and whether ordinary controls still work. A video of the gesture is useful if it contains no private information.
 
 For an Android AI box, include its model and software version, the touch tester used, and the maximum pointer count it actually displayed. A working box does not establish direct iPhone support.
 

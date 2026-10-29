@@ -50,6 +50,39 @@ instalacja nie wymaga ENET, klucza SSH na komputerze ani internetu.
    zapisów, korzystając z bezpiecznego usuwania w sklepie, jeśli jest dostępne,
    albo po pełnym wyłączeniu MGU.
 
+## Instalacja w MGU Store ze screenami
+
+Poniższe zrzuty pochodzą z [repozytorium autora MGU Store](https://github.com/robertnisipeanu/mgu-store/tree/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots).
+Pokazują przykładowe pozycje sklepu i starsze numery wersji, a nie instalację naszej
+poprawki. Nasza paczka wymaga `mgu-deploy` 0.6.4+. Obrazki są wczytywane z
+repozytorium autora; pełna instrukcja tekstowa znajduje się również w ZIP-ie.
+
+**1. Otwórz USB.** Wypakuj ZIP bezpośrednio na pendrive i włóż go do auta.
+W sklepie wybierz **USB**, a następnie źródło `marex-carplay-multitouch`.
+Szukaj pozycji **CarPlay Multitouch - iDrive 7**; pozycje na screenie są przykładowe.
+
+![Zakładka USB w MGU Store, zrzut autora robertnisipeanu](https://raw.githubusercontent.com/robertnisipeanu/mgu-store/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots/usb.png)
+
+**2. Otwórz paczkę i wybierz Install.** Screen przedstawia przykładową pozycję
+autora. U siebie upewnij się, że wybrany tytuł to **CarPlay Multitouch - iDrive 7**,
+następnie kliknij **Install**.
+
+![Przykładowe szczegóły paczki i przycisk Install w MGU Store](https://raw.githubusercontent.com/robertnisipeanu/mgu-store/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots/app.png)
+
+**3. Sprawdź wynik i wykonaj restart.** Pendrive pozostaje wpięty na czas kopii.
+Sukces musi zawierać `prepared-for-next-full-boot` oraz `Backup verified on USB`.
+Dopiero po sukcesie wybierz **Settings > Restart head unit** — przycisk jest
+w prawym dolnym rogu ekranu poniżej. Gdy MGU wstanie, zrestartuj także Android box,
+jeśli go używasz.
+
+![Ustawienia MGU Store i Restart head unit w prawym dolnym rogu](https://raw.githubusercontent.com/robertnisipeanu/mgu-store/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots/settings.png)
+
+**4. Usuwanie.** Wybierz **Installed**, znajdź **CarPlay Multitouch - iDrive 7**
+wśród narzędzi jednostki, otwórz je, kliknij **Remove** i wykonaj pełny restart MGU.
+Lista poniżej jest przykładem autora; poprawka będzie osobną pozycją.
+
+![Przykładowa lista Installed w MGU Store](https://raw.githubusercontent.com/robertnisipeanu/mgu-store/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots/installed.png)
+
 ## Kopia i cofnięcie zmiany
 
 Przed utworzeniem plików aktywujących poprawkę instalator zapisuje na pendrivie

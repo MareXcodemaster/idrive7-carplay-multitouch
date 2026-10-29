@@ -1,11 +1,11 @@
 'use strict';
-/* MGU Store adapter for the stable, exact-version two-contact patch.
+/* MGU Store adapter for the stable, exact-version CarPlay Multitouch patch.
  * Node 8; no network, OEM writes, remounts, service changes or automatic reboot.
  * Store owns the drop-in and tool directory; Remove restores factory on reboot.
  */
 var fs=require('fs'),path=require('path'),crypto=require('crypto'),cp=require('child_process'),zlib=require('zlib');
 var patcher=require('../patch/patcher'),patch=require('../patch/patch.json');
-var ID='marex-carplay-multitouch',VERSION='0.1.0';
+var ID='marex-carplay-multitouch',VERSION='0.1.1';
 var ROOT='/var/opt/'+ID,DROP='/etc/systemd/system/carplay.service.d/60-mgu-carplay-multitouch.conf';
 var MARKER='mgu-repo/'+ID+'/USB-INSTALL.json';
 var STATE_FILES=['carplay','manager.js','install.json','factory-unit.txt','backup-receipt.json','disabled.json','pending.json','health.json'];

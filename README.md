@@ -12,9 +12,9 @@ if access has not already been enabled.
 
 | Edition | Download | Requirements | Instructions |
 | --- | --- | --- | --- |
-| Windows GUI | [Windows ZIP v0.2.0](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.0/iDrive7-Multitouch-Installer-v0.2.0-Windows.zip) | ENET, root SSH, Windows OpenSSH Client, .NET 4.8 | [English](gui/README-EN.md) / [Polski](gui/README-PL.md) |
-| USB via MGU Store | [USB ZIP v0.1.0](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.0/iDrive7-CarPlay-Multitouch-USB-v0.1.0.zip) | Root and MGU Store already installed; mgu-deploy 0.6.4+ | [English](store/README-EN.md) / [Polski](store/README-PL.md) |
-| Complete source | [Source ZIP](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.0/iDrive7-Multitouch-Installer-v0.2.0-Source.zip) | For review or building the installers | [Changelog](CHANGELOG.md) |
+| Windows GUI | [Windows ZIP v0.2.1](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.1/iDrive7-Multitouch-Installer-v0.2.1-Windows.zip) | ENET, root SSH, Windows OpenSSH Client, .NET 4.8 | [English](gui/README-EN.md) / [Polski](gui/README-PL.md) |
+| USB via MGU Store | [USB ZIP v0.1.1](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.1/iDrive7-CarPlay-Multitouch-USB-v0.1.1.zip) | Root and MGU Store already installed; mgu-deploy 0.6.4+ | [English](store/README-EN.md) / [Polski](store/README-PL.md) |
+| Complete source | [Source ZIP](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.1/iDrive7-Multitouch-Installer-v0.2.1-Source.zip) | For review or building the installers | [Changelog](CHANGELOG.md) |
 
 The Windows GUI starts in English and offers Polish. Both editions make a
 **CarPlay-scoped backup**, with install and removal support. The stable patch
@@ -22,11 +22,24 @@ has been tested in a vehicle; these new GUI/USB installation workflows have
 **local tests only** and are published as a preview. Read the success checks in
 the relevant guide before restarting the head unit.
 
+## Illustrated guides
+
+Step-by-step screenshots: **[Windows EN](gui/README-EN.md#illustrated-installation)**
+· **[Windows PL](gui/README-PL.md#instalacja-ze-screenami)**
+· **[MGU Store USB EN](store/README-EN.md#illustrated-mgu-store-installation)**
+· **[MGU Store USB PL](store/README-PL.md#instalacja-w-mgu-store-ze-screenami)**.
+
+The Windows screenshots are from this program; ready-state data is an example.
+The Store guide credits the original Store author's screenshots and explains
+which package to select. These pictures do not claim a new in-car installer test.
+
+![CarPlay Multitouch Windows installer](gui/screenshots/windows-start-en.png)
+
 ## Compatibility
 
 | Item | Status |
 | --- | --- |
-| Two-finger gestures through a wireless CarPlay Android AI box | Confirmed in one G30 test |
+| Multitouch gestures through a wireless CarPlay Android AI box | Confirmed in one G30 test |
 | Factory CarPlay connected directly to an iPhone | **Not tested** |
 | Three or five simultaneous fingers | Not implemented |
 | Other CarPlay executable hashes | Refused by the installer |
@@ -154,11 +167,11 @@ At startup, the guard checks the original and patched hashes. An unfinished prev
 
 The factory input path receives multiple touch contacts but forwards one. This patch tracks two contacts independently and registers a 133-byte HID descriptor. It sends a 12-byte report with two fixed slots: transducer index, touch state, X (little-endian 16-bit), and Y (little-endian 16-bit). Each finger can move or release without dropping the other.
 
-The receiver used in the confirmed test accepts this legacy two-contact format. That test does not prove that every CarPlay receiver or iPhone software version accepts it.
+The receiver used in the confirmed test accepts this legacy multitouch format. That test does not prove that every CarPlay receiver or iPhone software version accepts it.
 
 ## Testing and reports
 
-The payload was checked with deterministic contact/release scenarios, randomized frames, ASLR, the original box decoder's instruction blocks, and a live two-finger test. The local delta patcher also verifies the output against the confirmed executable byte for byte.
+The payload was checked with deterministic contact/release scenarios, randomized frames, ASLR, the original box decoder's instruction blocks, and a live multitouch test. The local delta patcher also verifies the output against the confirmed executable byte for byte.
 
 Run the public tests without a vehicle or BMW firmware:
 

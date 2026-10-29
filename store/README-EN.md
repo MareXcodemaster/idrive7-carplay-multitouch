@@ -50,6 +50,38 @@ this package once the Store is working in the car.
    the stick using Store's safe-removal option if available, or after MGU has
    fully shut down.
 
+## Illustrated MGU Store installation
+
+The following screenshots come from the [MGU Store author's repository](https://github.com/robertnisipeanu/mgu-store/tree/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots).
+They show example Store items and older version numbers, not an installation of
+this patch. Our package requires `mgu-deploy` 0.6.4+. Images load from that
+repository; the complete written instructions are also included in this ZIP.
+
+**1. Open USB.** Extract the USB ZIP to the stick root and insert it. In the
+Store's **USB** page select the `marex-carplay-multitouch` source. Your package
+will be named **CarPlay Multitouch - iDrive 7**, rather than the example items.
+
+![MGU Store USB page, screenshot by robertnisipeanu](https://raw.githubusercontent.com/robertnisipeanu/mgu-store/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots/usb.png)
+
+**2. Open the package and press Install.** The screenshot below shows the
+author's example item. In your car, check that the selected title is
+**CarPlay Multitouch - iDrive 7** before choosing **Install**.
+
+![Example package details and Install button in MGU Store](https://raw.githubusercontent.com/robertnisipeanu/mgu-store/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots/app.png)
+
+**3. Check the result, then restart.** Keep the stick inserted for backup.
+Successful setup must show `prepared-for-next-full-boot` and
+`Backup verified on USB`. After success choose **Settings > Restart head unit**,
+shown at bottom right below. With an Android box, reboot the box after MGU is back.
+
+![MGU Store Settings with Restart head unit at bottom right](https://raw.githubusercontent.com/robertnisipeanu/mgu-store/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots/settings.png)
+
+**4. Remove when needed.** Open **Installed**, choose **CarPlay Multitouch -
+iDrive 7** under the head-unit tools, then **Remove**, and fully restart MGU.
+The list below is the author's example; the patch will have its own entry.
+
+![MGU Store Installed page, example tools list](https://raw.githubusercontent.com/robertnisipeanu/mgu-store/7fafa44a040cdefe6a254b4964e3d497d23123ed/docs/screenshots/installed.png)
+
 ## Backup and removal
 
 Before creating activation files, setup writes and reads back a verified backup

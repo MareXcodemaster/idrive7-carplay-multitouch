@@ -1,5 +1,5 @@
 'use strict';
-// Node 8 remote endpoint for the two-contact GUI. No Android box operations.
+// Node 8 remote endpoint for the CarPlay Multitouch GUI. No Android box operations.
 var fs=require('fs'),path=require('path'),crypto=require('crypto'),cp=require('child_process');
 var agent=require('../agent'),patch=require('../patch/patch.json');
 var ROOT='/var/opt/mgu-carplay-multitouch',DROP='/etc/systemd/system/carplay.service.d/60-mgu-carplay-multitouch.conf';
@@ -32,7 +32,7 @@ function validateBackup(b,expected){
   if(meta.package!=='idrive7-carplay-multitouch'||meta.originalSha256!==expected||meta.candidateSha256!==patch.candidate.sha256)throw Error('Unknown backup installation');
   if(!decoded[own+'carplay']||!decoded[own+'manager.js'])throw Error('Backup patch files are missing');
   // Preserve damaged owned files for diagnostics too. Restore never executes or
-  // writes these archived binaries: it rebuilds the verified two-finger copy.
+  // writes these archived binaries: it rebuilds the verified multitouch copy.
  }else if(Object.keys(decoded).some(function(n){return n.indexOf(own)===0;}))throw Error('Unowned installation files in backup');
  return {wasInstalled:b.state.wasInstalled,files:Object.keys(decoded).length,bytes:total};
 }

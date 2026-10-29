@@ -11,7 +11,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PACKAGE = HERE.parent
 ID = "marex-carplay-multitouch"
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 ROOT = "/var/opt/" + ID
 RUN = "/run/" + ID
 DROP = "carplay.service.d/60-mgu-carplay-multitouch.conf"

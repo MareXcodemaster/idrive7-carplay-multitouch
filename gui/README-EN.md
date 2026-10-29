@@ -11,6 +11,33 @@ Run `iDrive7-Multitouch-Installer.exe` on Windows 10/11 with .NET Framework 4.8 
 5. Click **Install**. A checksum-verified PC backup must complete before any installation change is sent.
 6. By default the app requests a full MGU reboot and verifies startup health. Leave it powered for the 60-second health check after CarPlay starts. An Android AI box may need its own full restart after MGU starts.
 
+## Illustrated installation
+
+These screenshots are from the current program. The ready screen uses example
+data; it is not evidence of a connection to your vehicle.
+
+**1. Connect and check.** Connect ENET and launch the program. Leave automatic
+IP/key discovery enabled or select your exported `id_rsa`. Click **Connect and
+check**. Root and the exact software profile must be verified before installation.
+
+![CarPlay Multitouch installer start screen](screenshots/windows-start-en.png)
+
+**2. Select the key if needed.** **Where is my key?** explains where the original
+rooting tool exports it. Choose `id_rsa` with no extension, not a `.pub` file.
+
+![SSH key selection guide](screenshots/windows-key-en.png)
+
+**3. Choose the backup folder and install.** Once checks pass, choose the PC
+backup folder, confirm parked vehicle/stable supply and click **Install**. The
+backup is created and verified before the change. Leave **Reboot and verify
+afterwards** enabled, and wait for startup verification to complete.
+
+![Example ready-to-install screen for CarPlay Multitouch](screenshots/windows-ready-en.png)
+
+**4. Revert.** Connect again and choose **Uninstall**, leaving reboot verification
+enabled. **Restore backup** restores the patch's previous state; **Open backups**
+shows your saved PC archives.
+
 Do not generate a new key just to run the installer. After successful Enable SSH / Flash, the rooting tool exports the accepted login key, usually `data/enrollments/<VIN>/id_rsa`. A new, unenrolled key will not grant access.
 
 Missing root or the key? Use the in-app link to [the original author's SSH/root instructions](https://github.com/cauliflowermossgrape/idrive7-8-ssh-root#readme). Authentication failure can mean the wrong key; it does not establish that the unit lacks root.
@@ -41,10 +68,10 @@ The installer preserves `/usr/bin/carplay`. No private SSH keys or BMW firmware 
 
 ## Compatibility and validation
 
-The two-contact patch was confirmed with a wireless CarPlay Android AI box. Direct iPhone CarPlay remains untested. The GUI does not modify an Android box or install a three/five-contact experiment.
+The multitouch patch was confirmed with a wireless CarPlay Android AI box. Direct iPhone CarPlay remains untested. The GUI does not modify an Android box or install a three/five-contact experiment.
 
 Only the exact factory executable SHA-256 below is supported; model/year alone does not establish compatibility:
 
 `ddb33e33161387c6479c391684b3d019b0de54ecfcee8d6877eca94aa62f3e50`
 
-The new GUI, backup handling, ENET parsers and command quoting have local tests. The GUI's complete workflow still needs an in-vehicle trial. Its patch and underlying install/removal engine reuse the already tested two-contact implementation.
+The new GUI, backup handling, ENET parsers and command quoting have local tests. The GUI's complete workflow still needs an in-vehicle trial. Its patch and underlying install/removal engine reuse the already tested multitouch implementation.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1 preview — 2026-10-29
+
+- Consistent CarPlay Multitouch labels in the GUI, descriptions and guides.
+- Illustrated English/Polish Windows installation guides, plus MGU Store USB
+  instructions illustrated with credited screenshots from the Store project.
+- No change to the touch-report format, patch payload or firmware compatibility.
+
 ## 0.2.0 preview — 2026-10-29
 
 - Windows GUI installer: English by default, Polish option, ENET discovery,
@@ -16,7 +23,7 @@
 
 ## 0.1.0 — 2026-10-28
 
-- Initial exact-version two-finger patch for iDrive 7 MGU.
+- Initial exact-version CarPlay Multitouch patch for iDrive 7 MGU.
 - Stable contact slots, coordinate clipping, duplicate suppression, and independent finger releases.
 - A 133-byte HID descriptor and 12-byte legacy CarPlay reports.
 - A pure Node.js 8-compatible delta patcher with input and output SHA-256 verification.

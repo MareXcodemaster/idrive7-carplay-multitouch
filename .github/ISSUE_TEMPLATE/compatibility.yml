@@ -49,7 +49,7 @@ body:
     id: observed
     attributes:
       label: Actual gesture results
-      description: State whether taps work, two-finger pinch works, each finger releases correctly, and the pointer count observed. Distinguish observations from guesses.
+      description: State whether taps work, multitouch pinch-to-zoom works, each contact releases correctly, and the pointer count observed. Distinguish observations from guesses.
     validations:
       required: true
   - type: textarea

@@ -2,7 +2,7 @@
   "name": "idrive7-carplay-multitouch",
   "version": "0.1.0",
   "private": true,
-  "description": "Exact-version two-finger CarPlay patch for BMW iDrive 7 MGU",
+  "description": "Exact-version CarPlay Multitouch patch for BMW iDrive 7 MGU",
   "license": "MIT",
   "engines": {
     "node": ">=8"

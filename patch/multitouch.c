@@ -1,4 +1,4 @@
-/* Experimental MGU CarPlay two-contact payload. No libc and no syscalls.
+/* Experimental MGU CarPlay multitouch payload. No libc and no syscalls.
  * Fixed-offset callers are used only after the exact factory SHA-256 is checked.
  * The factory registration routine copies our temporary descriptor synchronously.
  */
