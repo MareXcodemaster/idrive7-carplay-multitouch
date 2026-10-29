@@ -8,7 +8,7 @@
     "node": ">=8"
   },
   "scripts": {
-    "test": "node tests/patcher.test.js && node tests/agent.test.js && node runtime/test-manager.js"
+    "test": "node tests/patcher.test.js && node tests/agent.test.js && node runtime/test-manager.js && node gui/backup.test.js && node gui/backend.test.js && node store/setup.test.js"
   },
   "repository": {
     "type": "git",

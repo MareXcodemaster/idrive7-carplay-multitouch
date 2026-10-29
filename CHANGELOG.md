@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0 preview — 2026-10-29
+
+- Windows GUI installer: English by default, Polish option, ENET discovery,
+  root SSH checks, automatic CarPlay-scoped backups, install/remove/restore,
+  and a guide to the key exported by the original rooting tool.
+- Offline USB tool for an already installed MGU Store (`mgu-deploy` 0.6.4+).
+  The USB package is version 0.1.0; the underlying stable patch is unchanged.
+- USB setup verifies the factory file, power and a read-back backup on the
+  inserted stick before preparing activation. Store manages removal of its
+  own configuration and patch files; a full head-unit restart applies changes.
+- English and Polish instructions, release downloads and checksum manifests.
+- GUI and USB workflows have local checks only. The underlying patch's vehicle
+  confirmation is with an Android AI box; direct iPhone CarPlay remains untested.
+
 ## 0.1.0 — 2026-10-28
 
 - Initial exact-version two-finger patch for iDrive 7 MGU.
