@@ -1,6 +1,10 @@
 # Instalator GUI — CarPlay Multitouch dla iDrive 7
 
 Język domyślny to angielski; przycisk **English / PL** przełącza na polski.
+Okno można zmniejszać za krawędzie i minimalizować do paska zadań.
+**Pokaż log / Ukryj log** zwija szczegóły; przy małym oknie dostępne jest przewijanie.
+
+![Zmniejszone, skalowalne okno instalatora](screenshots/windows-compact-pl.png)
 
 Uruchom `iDrive7-Multitouch-Installer.exe` na Windows 10/11 z .NET Framework 4.8 i klientem OpenSSH. Nie potrzebujesz lokalnego Pythona ani Node.js. W MGU muszą być już dostępne root/SSH i Node.js 8.
 
@@ -83,4 +87,4 @@ Inny hash lub obca konfiguracja usługi blokują instalację. Sam model/rocznik 
 
 ## Sprawdzenie nowego GUI
 
-Przeszły testy lokalne kopii, przywracania, parserów ENET, argumentów Windows i ograniczeń danych. Pełny przebieg nowego GUI wymaga jeszcze próby na aucie; sama poprawka CarPlay Multitouch oraz bazowy mechanizm instalacji/usunięcia były już sprawdzane.
+29.10.2026 na G30 sprawdzono przez rzeczywiste GUI: wykrywanie i logowanie, backupy, usunięcie poprawki, działanie fabrycznego CarPlay, ponowną instalację oraz restarty i kontrolę działania. Kompaktowy układ sprawdzono osobno lokalnie. Przycisk Przywróć kopię nie przeszedł jeszcze próby na aucie; logika walidacji i odtwarzania ma testy lokalne.

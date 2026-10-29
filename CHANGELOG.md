@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2 — 2026-10-29
+
+- Compact resizable window, lower minimum size, working taskbar minimization,
+  collapsible log and scrolling for small windows. Updated English/Polish images.
+- Clear factory-CarPlay status after uninstall.
+- Windows ENET backup/uninstall/reinstall/reboot/health cycle confirmed on a G30.
+- USB/MGU Store edition withdrawn after an unsuccessful vehicle trial; its
+  installation code and download packages have been removed. A removal guide
+  remains for existing users.
+
 ## 0.2.1 preview — 2026-10-29
 
 - Consistent CarPlay Multitouch labels in the GUI, descriptions and guides.

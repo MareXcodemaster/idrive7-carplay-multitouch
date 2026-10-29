@@ -4,14 +4,14 @@ import hashlib,json,shutil,sys,zipfile
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from build import build
 PACKAGE=Path(__file__).resolve().parent.parent
-VERSION='0.2.1'
+VERSION='0.2.2'
 def local_tests(out):
  core_path=out/'gui-core-tests.json';backend_path=out/'gui-backend-tests.json'
  if not core_path.exists() or not backend_path.exists():return {'passed':False,'note':'Local test reports are not available in this build directory'}
  core=json.loads(core_path.read_text(encoding='utf-8'));backend=json.loads(backend_path.read_text(encoding='utf-8'))
  return {'backendGroups':sum(v.get('groups',0) for v in backend.values()),'windowsCoreGroups':core.get('groups',0),'passed':bool(core.get('passed')) and all(v.get('passed') for v in backend.values())}
-def package():
- exe=build();out=exe.parent
+def package(output=None):
+ exe=build(output);out=exe.parent
  for src,dst in [('gui/README-PL.md','INSTRUKCJA-PL.md'),('gui/README-EN.md','README-EN.md'),('LICENSE','LICENSE')]:shutil.copyfile(PACKAGE/src,out/dst)
  names=[exe.name,exe.name+'.config','INSTRUKCJA-PL.md','README-EN.md','LICENSE']
  screenshots=PACKAGE/'gui/screenshots'
@@ -41,4 +41,4 @@ def package():
    if z.testzip():raise RuntimeError('ZIP verification failed')
  report={'version':VERSION,'patchContacts':2,'defaultLanguage':'English','release':{'name':binary.name,'bytes':binary.stat().st_size,'sha256':hashlib.sha256(binary.read_bytes()).hexdigest()},'source':{'name':source.name,'files':count,'sha256':hashlib.sha256(source.read_bytes()).hexdigest()},'guiLocalTests':local_tests(out),'guiVehicleInstallTested':False,'underlyingPatchPreviouslyVehicleTested':True,'backupScope':'CarPlay files and patch configuration, not full MGU','containsFirmware':False,'containsPrivateKeys':False}
  (out/'release-manifest.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8');print(json.dumps(report,indent=2))
-if __name__=='__main__':package()
+if __name__=='__main__':package(sys.argv[1] if len(sys.argv)>1 else None)

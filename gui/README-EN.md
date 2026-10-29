@@ -1,6 +1,10 @@
 # iDrive 7 CarPlay Multitouch — Windows GUI
 
 English is the default language. Use **English / PL** to switch to Polish.
+The window is resizable and can be minimized to the taskbar. **Show log / Hide log**
+collapses the detailed log; narrow or short windows scroll instead of clipping controls.
+
+![A smaller resizable installer window](screenshots/windows-compact-en.png)
 
 Run `iDrive7-Multitouch-Installer.exe` on Windows 10/11 with .NET Framework 4.8 and the Windows OpenSSH Client. Local Python and Node.js are not needed. Your MGU must already have root/SSH access and Node.js 8.
 
@@ -74,4 +78,4 @@ Only the exact factory executable SHA-256 below is supported; model/year alone d
 
 `ddb33e33161387c6479c391684b3d019b0de54ecfcee8d6877eca94aa62f3e50`
 
-The new GUI, backup handling, ENET parsers and command quoting have local tests. The GUI's complete workflow still needs an in-vehicle trial. Its patch and underlying install/removal engine reuse the already tested multitouch implementation.
+The ENET GUI's automatic discovery/authentication, verified backups, removal, factory CarPlay verification, reinstallation and reboot/health cycle passed a real G30 test on 29 October 2026. The compact layout has separate local visual checks. The Restore backup button has not yet had a live trial; its validation/restore logic has local tests.

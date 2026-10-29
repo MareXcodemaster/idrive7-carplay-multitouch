@@ -14,34 +14,40 @@ public class MainForm:Form {
  TextBox host=new TextBox(),key=new TextBox(),backup=new TextBox();RichTextBox log=new RichTextBox();
  Label hostCaption,keyCaption,backupCaption;
  Label connection=new Label(),state=new Label(),voltage=new Label(),step=new Label(),copyNote=new Label(),subtitle=new Label();
- Button connect=new Button(),install=new Button(),remove=new Button(),restore=new Button(),save=new Button(),open=new Button(),pickKey=new Button(),pickFolder=new Button();
+ Button connect=new Button(),install=new Button(),remove=new Button(),restore=new Button(),save=new Button(),open=new Button(),pickKey=new Button(),pickFolder=new Button(),details=new Button();
+ TableLayoutPanel shell;Panel viewport;bool detailsVisible=false;
  CheckBox ready=new CheckBox(),activate=new CheckBox();Button language=new Button();ProgressBar progress=new ProgressBar();LinkLabel rootLink=new LinkLabel(),keyHelp=new LinkLabel();
  Session session;bool busy=false,en=true,previewMode=false;string lastBackup="",logFile; string inputHost,inputKey,inputBackup;bool inputReady,inputActivate;
  string T(string pl,string eng){return en?eng:pl;}
  Label L(string text,int size=10,bool bold=false){return new Label{Text=text,AutoSize=true,ForeColor=ink,Font=new Font("Segoe UI",size,bold?FontStyle.Bold:FontStyle.Regular),Margin=new Padding(0,4,0,4)};}
- Button B(Button b,string text,bool primary=false){b.Text=text;b.Height=39;b.Width=145;b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=primary?blue:Color.FromArgb(209,219,230);b.BackColor=primary?blue:Color.White;b.ForeColor=primary?Color.White:ink;b.Font=new Font("Segoe UI",10,FontStyle.Bold);b.Cursor=Cursors.Hand;b.Margin=new Padding(0,0,8,8);return b;}
+ Button B(Button b,string text,bool primary=false){b.Text=text;b.Height=32;b.Width=118;b.FlatStyle=FlatStyle.Flat;b.FlatAppearance.BorderColor=primary?blue:Color.FromArgb(209,219,230);b.BackColor=primary?blue:Color.White;b.ForeColor=primary?Color.White:ink;b.Font=new Font("Segoe UI",9,FontStyle.Bold);b.Cursor=Cursors.Hand;b.Margin=new Padding(0,0,6,6);return b;}
  public MainForm() {
-  Text="iDrive 7 · CarPlay Multitouch";Width=970;Height=850;MinimumSize=new Size(930,810);StartPosition=FormStartPosition.CenterScreen;
-  BackColor=Color.FromArgb(243,246,251);ForeColor=ink;Font=new Font("Segoe UI",10);AutoScaleMode=AutoScaleMode.Dpi;
-  var shell=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=1,RowCount=7,Padding=new Padding(26,19,26,15)};
-  foreach(var height in new[]{92,172,84,92,57})shell.RowStyles.Add(new RowStyle(SizeType.Absolute,height));shell.RowStyles.Add(new RowStyle(SizeType.Percent,100));shell.RowStyles.Add(new RowStyle(SizeType.Absolute,42));Controls.Add(shell);
-  var header=new Panel{Dock=DockStyle.Fill};var title=L("CarPlay Multitouch · iDrive 7",25,true);title.Location=new Point(0,0);header.Controls.Add(title);subtitle.Location=new Point(1,47);subtitle.AutoSize=true;subtitle.ForeColor=muted;header.Controls.Add(subtitle);
-  B(language,"Polski / EN");language.Height=29;language.Width=110;language.Dock=DockStyle.Top;var langPanel=new Panel{Dock=DockStyle.Right,Width=110,Padding=new Padding(0,7,0,0)};langPanel.Controls.Add(language);header.Controls.Add(langPanel);shell.Controls.Add(header);
-  var grid=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=3,RowCount=4,BackColor=Color.White,Padding=new Padding(14,9,14,9)};
-  grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,150));grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,174));
-  for(int i=0;i<4;i++)grid.RowStyles.Add(new RowStyle(SizeType.Absolute,36));
+  Text="iDrive 7 · CarPlay Multitouch";ClientSize=new Size(720,470);MinimumSize=new Size(520,330);StartPosition=FormStartPosition.CenterScreen;FormBorderStyle=FormBorderStyle.Sizable;MinimizeBox=true;MaximizeBox=true;
+  BackColor=Color.FromArgb(243,246,251);ForeColor=ink;Font=new Font("Segoe UI",9);AutoScaleMode=AutoScaleMode.Dpi;
+  viewport=new Panel{Dock=DockStyle.Fill,AutoScroll=true};Controls.Add(viewport);
+  shell=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,ColumnCount=1,RowCount=8,Padding=new Padding(14,10,14,10),Margin=Padding.Empty};
+  shell.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));for(int i=0;i<8;i++)shell.RowStyles.Add(new RowStyle(SizeType.AutoSize));shell.RowStyles[6].SizeType=SizeType.Absolute;shell.RowStyles[6].Height=0;viewport.Controls.Add(shell);
+  var header=new TableLayoutPanel{Dock=DockStyle.Top,AutoSize=true,ColumnCount=2,RowCount=2,Margin=new Padding(0,0,0,9)};header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,100));
+  var title=L("CarPlay Multitouch · iDrive 7",18,true);title.Margin=Padding.Empty;header.Controls.Add(title,0,0);subtitle.AutoSize=true;subtitle.ForeColor=muted;subtitle.Margin=new Padding(0,2,0,0);subtitle.Font=new Font("Segoe UI",8.5f);header.Controls.Add(subtitle,0,1);
+  var langPanel=new FlowLayoutPanel{Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown,WrapContents=false,Margin=new Padding(6,0,0,0),AutoSize=true};B(language,"English / PL");language.Height=24;language.Width=94;language.Margin=new Padding(0,0,0,3);B(details,"Show log");details.Height=24;details.Width=94;details.Margin=Padding.Empty;langPanel.Controls.Add(language);langPanel.Controls.Add(details);header.Controls.Add(langPanel,1,0);header.SetRowSpan(langPanel,2);shell.Controls.Add(header,0,0);
+  var grid=new TableLayoutPanel{Dock=DockStyle.Top,Height=154,ColumnCount=3,RowCount=4,BackColor=Color.White,Padding=new Padding(9,7,9,7),Margin=Padding.Empty};
+  grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,110));grid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));grid.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,138));
+  for(int i=0;i<4;i++)grid.RowStyles.Add(new RowStyle(SizeType.Absolute,34));
   grid.Controls.Add(hostCaption=L("MGU IP (auto)"),0,0);host.Dock=DockStyle.Fill;host.Margin=new Padding(0,3,12,3);grid.Controls.Add(host,1,0);B(connect,"Połącz i sprawdź",true);connect.Dock=DockStyle.Fill;grid.Controls.Add(connect,2,0);
   grid.Controls.Add(keyCaption=L("SSH key (optional)"),0,1);key.Dock=DockStyle.Fill;key.Margin=new Padding(0,3,12,3);grid.Controls.Add(key,1,1);B(pickKey,"Wybierz plik…");pickKey.Dock=DockStyle.Fill;grid.Controls.Add(pickKey,2,1);
   grid.Controls.Add(backupCaption=L("Backup folder"),0,2);backup.Text=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"iDrive7-Multitouch","Backups");backup.Dock=DockStyle.Fill;backup.Margin=new Padding(0,3,12,3);grid.Controls.Add(backup,1,2);B(pickFolder,"Wybierz folder…");pickFolder.Dock=DockStyle.Fill;grid.Controls.Add(pickFolder,2,2);
-  rootLink.AutoSize=true;rootLink.Margin=new Padding(0,4,0,0);rootLink.LinkColor=blue;grid.Controls.Add(rootLink,1,3);grid.SetColumnSpan(rootLink,2);shell.Controls.Add(grid);
-  keyHelp.AutoSize=true;keyHelp.Margin=new Padding(0,4,0,0);keyHelp.LinkColor=blue;keyHelp.Font=new Font("Segoe UI",9);grid.Controls.Add(keyHelp,0,3);
-  var facts=new TableLayoutPanel{Dock=DockStyle.Fill,ColumnCount=2,RowCount=2,Padding=new Padding(2,13,2,4)};facts.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,75));facts.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,25));
-  connection.Dock=DockStyle.Fill;connection.Font=new Font("Segoe UI",11,FontStyle.Bold);facts.Controls.Add(connection,0,0);voltage.Dock=DockStyle.Fill;voltage.TextAlign=ContentAlignment.TopRight;voltage.Font=new Font("Segoe UI",11,FontStyle.Bold);facts.Controls.Add(voltage,1,0);state.Dock=DockStyle.Fill;state.ForeColor=muted;facts.Controls.Add(state,0,1);facts.SetColumnSpan(state,2);shell.Controls.Add(facts);
-  var actions=new FlowLayoutPanel{Dock=DockStyle.Fill,WrapContents=true};actions.Controls.Add(B(install,"Zainstaluj",true));actions.Controls.Add(B(remove,"Usuń poprawkę"));actions.Controls.Add(B(restore,"Przywróć kopię"));actions.Controls.Add(B(save,"Zrób kopię"));actions.Controls.Add(B(open,"Otwórz kopie"));
-  ready.AutoSize=true;ready.Margin=new Padding(0,0,15,0);activate.AutoSize=true;activate.Checked=true;activate.Margin=new Padding(0);actions.Controls.Add(ready);actions.Controls.Add(activate);shell.Controls.Add(actions);
-  var statusPanel=new Panel{Dock=DockStyle.Fill};step.Dock=DockStyle.Top;step.Height=25;step.Font=new Font("Segoe UI",11,FontStyle.Bold);progress.Dock=DockStyle.Bottom;progress.Height=5;progress.Style=ProgressBarStyle.Continuous;statusPanel.Controls.Add(step);statusPanel.Controls.Add(progress);shell.Controls.Add(statusPanel);
-  log.Dock=DockStyle.Fill;log.ReadOnly=true;log.BackColor=Color.White;log.BorderStyle=BorderStyle.None;log.Font=new Font("Consolas",9);log.DetectUrls=false;shell.Controls.Add(log);
-  copyNote.Dock=DockStyle.Fill;copyNote.ForeColor=muted;copyNote.Font=new Font("Segoe UI",9);copyNote.Padding=new Padding(0,8,0,0);shell.Controls.Add(copyNote);
+  rootLink.AutoSize=true;rootLink.Margin=new Padding(0,4,0,0);rootLink.LinkColor=blue;grid.Controls.Add(rootLink,1,3);grid.SetColumnSpan(rootLink,2);shell.Controls.Add(grid,0,1);
+  keyHelp.AutoSize=true;keyHelp.Margin=new Padding(0,4,0,0);keyHelp.LinkColor=blue;keyHelp.Font=new Font("Segoe UI",8.5f);grid.Controls.Add(keyHelp,0,3);
+  foreach(var caption in new[]{hostCaption,keyCaption,backupCaption}){caption.Font=new Font("Segoe UI",9);caption.AutoSize=false;caption.Dock=DockStyle.Fill;caption.TextAlign=ContentAlignment.MiddleLeft;caption.Margin=Padding.Empty;}
+  var facts=new TableLayoutPanel{Dock=DockStyle.Top,Height=70,ColumnCount=2,RowCount=2,Padding=new Padding(2,9,2,7),Margin=Padding.Empty};facts.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,80));facts.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,20));facts.RowStyles.Add(new RowStyle(SizeType.Absolute,23));facts.RowStyles.Add(new RowStyle(SizeType.Percent,100));
+  connection.Dock=DockStyle.Fill;connection.Font=new Font("Segoe UI",9.5f,FontStyle.Bold);facts.Controls.Add(connection,0,0);voltage.Dock=DockStyle.Fill;voltage.TextAlign=ContentAlignment.TopRight;voltage.Font=new Font("Segoe UI",10,FontStyle.Bold);facts.Controls.Add(voltage,1,0);state.Dock=DockStyle.Fill;state.ForeColor=muted;facts.Controls.Add(state,0,1);facts.SetColumnSpan(state,2);shell.Controls.Add(facts,0,2);
+  var actions=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,WrapContents=true,Margin=Padding.Empty};actions.Controls.Add(B(install,"Zainstaluj",true));actions.Controls.Add(B(remove,"Usuń poprawkę"));actions.Controls.Add(B(restore,"Przywróć kopię"));actions.Controls.Add(B(save,"Zrób kopię"));actions.Controls.Add(B(open,"Otwórz kopie"));shell.Controls.Add(actions,0,3);
+  var options=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,WrapContents=true,Margin=new Padding(0,0,0,5)};ready.AutoSize=true;ready.Margin=new Padding(0,0,12,4);activate.AutoSize=true;activate.Checked=true;activate.Margin=new Padding(0,0,0,4);options.Controls.Add(ready);options.Controls.Add(activate);shell.Controls.Add(options,0,4);
+  var statusPanel=new Panel{Dock=DockStyle.Top,Height=29,Margin=Padding.Empty};step.Dock=DockStyle.Top;step.Height=23;step.Font=new Font("Segoe UI",9.5f,FontStyle.Bold);progress.Dock=DockStyle.Bottom;progress.Height=4;progress.Style=ProgressBarStyle.Continuous;statusPanel.Controls.Add(step);statusPanel.Controls.Add(progress);shell.Controls.Add(statusPanel,0,5);
+  log.Dock=DockStyle.Fill;log.Visible=false;log.ReadOnly=true;log.BackColor=Color.White;log.BorderStyle=BorderStyle.None;log.Font=new Font("Consolas",8.5f);log.DetectUrls=false;log.Margin=new Padding(0,7,0,0);shell.Controls.Add(log,0,6);
+  copyNote.AutoSize=true;copyNote.Dock=DockStyle.Top;copyNote.ForeColor=muted;copyNote.Font=new Font("Segoe UI",8.5f);copyNote.Margin=new Padding(0,7,0,0);shell.Controls.Add(copyNote,0,7);
+  Action reflow=()=>{int outer=Math.Max(250,viewport.ClientSize.Width);shell.MaximumSize=new Size(outer,0);int width=Math.Max(100,outer-shell.Padding.Horizontal-6);header.MaximumSize=new Size(width,0);grid.MaximumSize=new Size(width,154);facts.MaximumSize=new Size(width,70);title.MaximumSize=new Size(Math.Max(120,width-106),0);subtitle.MaximumSize=new Size(Math.Max(120,width-106),0);copyNote.MaximumSize=new Size(width,0);actions.MaximumSize=new Size(width,0);options.MaximumSize=new Size(width,0);rootLink.MaximumSize=new Size(Math.Max(140,width-128),30);};
+  viewport.SizeChanged+=(s,e)=>reflow();Shown+=(s,e)=>reflow();details.Click+=(s,e)=>{detailsVisible=!detailsVisible;log.Visible=detailsVisible;shell.RowStyles[6].Height=detailsVisible?160:0;details.Text=detailsVisible?T("Ukryj log","Hide log"):T("Pokaż log","Show log");reflow();};
   var tips=new ToolTip{AutoPopDelay=12000};tips.SetToolTip(host,"Pozostaw puste, aby wykryć auto przez ENET. / Leave blank for ENET discovery.");tips.SetToolTip(key,"Pozostaw puste: automatyczne szukanie klucza dla VIN i próba agenta SSH. Wybierz plik tylko jeśli auto-logowanie nie działa. / Leave blank for VIN-specific key discovery and SSH agent/default authentication. Choose a file only if automatic login fails.");
   tips.SetToolTip(activate,"Pełny restart MGU i automatyczna kontrola po 60 sekundach. Box może wymagać własnego restartu po uruchomieniu MGU. / Full MGU reboot and 60-second health check; an AI box may need its own restart.");
   logFile=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"iDrive7Multitouch","Logs",DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")+".log");Directory.CreateDirectory(Path.GetDirectoryName(logFile));
@@ -76,12 +82,12 @@ public class MainForm:Form {
  protected override void OnShown(EventArgs e){base.OnShown(e);Cues();}
  void Cues(){if(key.IsHandleCreated)SendMessage(key.Handle,0x1501,IntPtr.Zero,T("Auto — klucz dla VIN / agent SSH","Auto — VIN key / SSH agent"));if(host.IsHandleCreated)SendMessage(host.Handle,0x1501,IntPtr.Zero,T("Automatyczne wykrywanie ENET","Automatic ENET discovery"));}
  void Translate(){
-  language.Text=en?"English / PL":"Polski / EN";hostCaption.Text=T("IP MGU (auto)","MGU IP (auto)");keyCaption.Text=T("Klucz SSH (opcjonalny)","SSH key (optional)");backupCaption.Text=T("Folder kopii","Backup folder");
+  language.Text=en?"English / PL":"Polski / EN";details.Text=detailsVisible?T("Ukryj log","Hide log"):T("Pokaż log","Show log");hostCaption.Text=T("IP MGU (auto)","MGU IP (auto)");keyCaption.Text=T("Klucz SSH","SSH key");backupCaption.Text=T("Folder kopii","Backup folder");
   subtitle.Text=T("Multitouch · ENET · sprawdzenie roota · kopia przed każdą zmianą","Multitouch · ENET · root check · backup before every change");
   keyHelp.Text=T("Gdzie jest klucz?","Where is my key?");rootLink.Text=T("Instrukcja root / SSH autora na GitHubie ↗","Author's root / SSH setup guide on GitHub ↗");
   connect.Text=T("Połącz i sprawdź","Connect and check");pickKey.Text=T("Wybierz plik…","Choose file…");pickFolder.Text=T("Wybierz folder…","Choose folder…");install.Text=T("Zainstaluj","Install");remove.Text=T("Usuń poprawkę","Uninstall");restore.Text=T("Przywróć kopię","Restore backup");save.Text=T("Zrób kopię","Create backup");open.Text=T("Otwórz kopie","Open backups");
   ready.Text=T("Auto zaparkowane, stabilne zasilanie ≥13 V","Vehicle parked, stable supply ≥13 V");activate.Text=T("Restart i kontrola po operacji","Reboot and verify afterwards");
-  copyNote.Text=T("Kopia na komputerze obejmuje CarPlay i konfigurację poprawki. Nie jest pełnym obrazem MGU.","PC backup covers CarPlay and patch configuration. It is not a full MGU image.");
+  copyNote.Text=T("Kopia: pliki CarPlay i konfiguracja poprawki. To nie jest pełny obraz MGU.","Backup: CarPlay files and patch configuration; not a full MGU image.");
   Cues();
   if(session==null){connection.Text=T("Niepołączono","Not connected");state.Text=T("Podłącz ENET i kliknij Połącz i sprawdź. Logowanie SSH jest wykrywane automatycznie.","Connect ENET and click Connect and check. SSH authentication is detected automatically.");voltage.Text="— V";step.Text=T("Gotowy do połączenia","Ready to connect");}
  }
@@ -111,6 +117,7 @@ public class MainForm:Form {
   voltage.ForeColor=value!=null&&value.ContainsKey("STAT_MILLI_VOLT_WERT")&&Convert.ToInt32(value["STAT_MILLI_VOLT_WERT"])>=13000?Color.FromArgb(30,122,83):Color.FromArgb(174,93,24);
   if(!Json.Bool(p,"supported")){state.Text=T("Root OK · niezgodna wersja MGU — instalacja zablokowana.","Root OK · unsupported MGU build — installation blocked.");state.ForeColor=Color.FromArgb(174,93,24);Log(Json.Str(p,"compatibilityError"));}
   else if(Json.Bool(s,"activePatched")&&Json.Obj(s,"pending")==null&&Json.Bool(Json.Obj(s,"health"),"verified")){state.Text=T("Root OK · zgodna wersja · CarPlay Multitouch zainstalowany i sprawdzony.","Root OK · compatible build · CarPlay Multitouch installed and health verified.");state.ForeColor=Color.FromArgb(30,122,83);}
+  else if(!Json.Bool(s,"installed")&&Json.Str(s,"processSha256")==Session.OriginalSha){state.Text=T("Root OK · fabryczny CarPlay · Multitouch nie jest zainstalowany.","Root OK · factory CarPlay · Multitouch is not installed.");state.ForeColor=muted;}
   else if(Json.Obj(s,"disabled")!=null){state.Text=T("Root OK · poprawka wyłączona przez zabezpieczenie. Można usunąć lub ponowić instalację.","Root OK · guard disabled the patch. Uninstall or retry installation.");state.ForeColor=Color.FromArgb(174,93,24);}
   else{state.Text=T("Root OK · zgodna wersja. Zmiana zapisana na dysku może wymagać restartu.","Root OK · compatible build. A change saved on disk may require reboot.");state.ForeColor=muted;}
   state.Text+=T("  iPhone bezpośrednio: niesprawdzone.","  Direct iPhone CarPlay: untested.");
@@ -124,16 +131,20 @@ public class MainForm:Form {
   RenderPreview(path,true,"ready");
  }
  public void RenderPreview(string path,bool english,string stage){
+  RenderPreview(path,english,stage,0,0);
+ }
+ public void RenderPreview(string path,bool english,string stage,int width,int height){
   previewMode=true;en=english;Translate();
+  if(width>0&&height>0)ClientSize=new Size(width,height);
   host.Text="";key.Text="";backup.Text=@"C:\Backups\iDrive7";ready.Checked=false;activate.Checked=true;log.Clear();
   Log(T("PODGLĄD INSTRUKCJI — dane przykładowe, bez połączenia z autem.","GUIDE PREVIEW — example data; no vehicle connection."));
-  if(stage=="ready"){
+  if(stage=="ready"||stage=="details"){
   host.Text="169.254.50.55";key.Text=@"C:\Keys\BMW\id_rsa";ready.Checked=true;
   connection.Text=T("ENET połączony   ·   root potwierdzony","ENET connected   ·   root verified");state.Text=T("Zgodna wersja MGU · kopia będzie zapisana przed instalacją","Compatible MGU build · backup will be saved before installation");voltage.Text="14.4 V";voltage.ForeColor=Color.FromArgb(30,122,83);step.Text=T("Gotowy do instalacji CarPlay Multitouch dla iDrive 7","Ready to install CarPlay Multitouch for iDrive 7");
   Log(T("ENET → MGU: połączenie sprawdzone","ENET → MGU: connection verified"));Log(T("SSH: UID 0 (root) potwierdzony","SSH: UID 0 (root) verified"));Log(T("Wersja fabrycznego CarPlay zgodna z poprawką","Factory CarPlay software matches the patch"));
   foreach(var b in new[]{install,remove,restore,save})b.Enabled=true;
   }
-  Show();Application.DoEvents();using(var bitmap=new Bitmap(Width,Height)){DrawToBitmap(bitmap,new Rectangle(0,0,Width,Height));bitmap.Save(path,System.Drawing.Imaging.ImageFormat.Png);}Close();
+  Show();Application.DoEvents();if(stage=="details"){details.PerformClick();Application.DoEvents();}using(var bitmap=new Bitmap(Width,Height)){DrawToBitmap(bitmap,new Rectangle(0,0,Width,Height));bitmap.Save(path,System.Drawing.Imaging.ImageFormat.Png);}Close();
  }
 }
 static class Program {
@@ -142,6 +153,7 @@ static class Program {
   if(args.Length==2&&args[0]=="--render-key-help"){using(var f=new KeyHelpForm(true))f.RenderPreview(args[1]);return 0;}
   if(args.Length==2&&args[0]=="--render-key-help-pl"){using(var f=new KeyHelpForm(false))f.RenderPreview(args[1]);return 0;}
   if(args.Length==4&&args[0]=="--render-guide"){using(var f=new MainForm())f.RenderPreview(args[1],args[2]!="pl",args[3]);return 0;}
+  if(args.Length==6&&args[0]=="--render-guide-size"){using(var f=new MainForm())f.RenderPreview(args[1],args[2]!="pl",args[3],int.Parse(args[4]),int.Parse(args[5]));return 0;}
   if(args.Length==2&&args[0]=="--render"){using(var f=new MainForm())f.RenderPreview(args[1]);return 0;}
   Application.Run(new MainForm());return 0;
  }

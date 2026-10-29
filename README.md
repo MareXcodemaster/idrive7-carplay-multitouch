@@ -12,26 +12,26 @@ if access has not already been enabled.
 
 | Edition | Download | Requirements | Instructions |
 | --- | --- | --- | --- |
-| Windows GUI | [Windows ZIP v0.2.1](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.1/iDrive7-Multitouch-Installer-v0.2.1-Windows.zip) | ENET, root SSH, Windows OpenSSH Client, .NET 4.8 | [English](gui/README-EN.md) / [Polski](gui/README-PL.md) |
-| USB via MGU Store | [USB ZIP v0.1.1](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.1/iDrive7-CarPlay-Multitouch-USB-v0.1.1.zip) | Root and MGU Store already installed; mgu-deploy 0.6.4+ | [English](store/README-EN.md) / [Polski](store/README-PL.md) |
-| Complete source | [Source ZIP](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.1/iDrive7-Multitouch-Installer-v0.2.1-Source.zip) | For review or building the installers | [Changelog](CHANGELOG.md) |
+| Windows GUI | [Windows ZIP v0.2.2](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.2/iDrive7-Multitouch-Installer-v0.2.2-Windows.zip) | ENET, root SSH, Windows OpenSSH Client, .NET 4.8 | [English](gui/README-EN.md) / [Polski](gui/README-PL.md) |
+| Complete source | [Source ZIP](https://github.com/MareXcodemaster/idrive7-carplay-multitouch/releases/download/v0.2.2/iDrive7-Multitouch-Installer-v0.2.2-Source.zip) | For review or building the installers | [Changelog](CHANGELOG.md) |
 
-The Windows GUI starts in English and offers Polish. Both editions make a
-**CarPlay-scoped backup**, with install and removal support. The stable patch
-has been tested in a vehicle; these new GUI/USB installation workflows have
-**local tests only** and are published as a preview. Read the success checks in
-the relevant guide before restarting the head unit.
+The Windows GUI starts in English and offers Polish. It makes a verified
+**CarPlay-scoped backup** before changes. The ENET GUI's backup, uninstall,
+reinstall and reboot/health cycle was confirmed on one G30 on 29 October 2026.
+Direct iPhone CarPlay remains untested.
 
-## Illustrated guides
+**The USB/MGU Store edition has been withdrawn after an unsuccessful vehicle
+trial.** Existing installations should be removed through MGU Store before using
+the Windows installer. [Removal instructions](docs/REMOVE-STORE-EDITION.md).
 
-Step-by-step screenshots: **[Windows EN](gui/README-EN.md#illustrated-installation)**
-· **[Windows PL](gui/README-PL.md#instalacja-ze-screenami)**
-· **[MGU Store USB EN](store/README-EN.md#illustrated-mgu-store-installation)**
-· **[MGU Store USB PL](store/README-PL.md#instalacja-w-mgu-store-ze-screenami)**.
+## Illustrated Windows guides
 
-The Windows screenshots are from this program; ready-state data is an example.
-The Store guide credits the original Store author's screenshots and explains
-which package to select. These pictures do not claim a new in-car installer test.
+**[English](gui/README-EN.md#illustrated-installation)** ·
+**[Polski](gui/README-PL.md#instalacja-ze-screenami)**.
+
+The compact window can be resized and minimized. **Show log / Pokaż log** opens
+or hides the details; small windows use scrolling to keep controls accessible.
+Screenshots use example connection data, not private vehicle identifiers.
 
 ![CarPlay Multitouch Windows installer](gui/screenshots/windows-start-en.png)
 
@@ -56,7 +56,7 @@ The resulting copy must have SHA-256 `2a009e6afe22f8f385b164ec9e2a7c2aa22b1c1c3a
 **Root/SSH access to the MGU is required before using this installer.** For setup instructions, see [idrive7-8-ssh-root](https://github.com/cauliflowermossgrape/idrive7-8-ssh-root#readme) by [cauliflowermossgrape](https://github.com/cauliflowermossgrape). Follow the author's compatibility and coding-backup instructions before enabling access.
 
 - An MGU with working **root SSH access already enabled**, and Node.js 8 available on the MGU.
-- A computer with **Python 3.8+** and the OpenSSH client. The installer uses Python's standard library.
+- For the CLI: **Python 3.8+** and the OpenSSH client. The Windows GUI does not need Python.
 - A working network connection to the MGU and your own SSH authentication.
 - A parked vehicle with stable power. Activation restarts the head unit; do not run it while driving.
 
@@ -69,45 +69,6 @@ A Windows GUI is available as `iDrive7-Multitouch-Installer.exe`. It discovers t
 Before each change it automatically downloads and verifies a **CarPlay rollback backup** on the PC. This includes the factory CarPlay executable and service plus the patch’s installation/configuration files. **It is not a full MGU image or coding backup.** Restore checks the vehicle VIN and file hashes, then restores the prior installed/uninstalled state using the verified patch code; it does not extract arbitrary archived files into the MGU. The original factory executable remains intact.
 
 The GUI has Polish/English labels and can request a full MGU reboot with startup health verification. An Android AI box may require its own full restart after MGU restarts. See [Polish GUI instructions](gui/README-PL.md). Build on Windows with `python gui/build.py`; the executable embeds only this project’s code and patch delta, not firmware or keys.
-
-## USB installation through MGU Store
-
-The separate USB edition is an offline **tool** for an already rooted MGU with
-[MGU Store](https://github.com/robertnisipeanu/mgu-store) installed (`mgu-deploy`
-0.6.4+). Extract its USB ZIP to the stick root, open Store's USB page and install
-**CarPlay Multitouch - iDrive 7**. Keep the stick inserted: setup verifies a
-CarPlay-scoped backup on it before preparing activation. After successful setup,
-use Store Settings to fully restart the head unit. Remove it using Store and
-restart again to revert. It does not need a PC SSH key for this operation.
-
-The USB edition has passed offline checks but still needs an in-car Store
-installation test. An existing Windows/ENET installation must be removed with
-its own installer before switching to the USB edition. Read the full
-[USB instructions in English](store/README-EN.md) or
-[Polish](store/README-PL.md), including the post-install success check and backup
-scope. Build the USB ZIP with `python store/build.py <output-directory>`.
-
-Quick USB steps:
-
-1. Extract the **USB ZIP** to the USB stick root. The path must be
-   `mgu-repo/marex-carplay-multitouch/catalog.json`, with the `.tgz` and
-   `USB-INSTALL.json` next to it. Leave at least 64 MB free and keep one matching
-   USB stick inserted.
-2. With stable vehicle power, open **MGU Store > USB**, select the
-   `marex-carplay-multitouch` source and install **CarPlay Multitouch - iDrive 7**.
-3. Keep the stick inserted. Check the operation log for
-   **`prepared-for-next-full-boot`** and **`Backup verified on USB`**. A Store
-   "installed" label alone does not confirm setup succeeded. A failed setup
-   must be resolved before activation.
-4. After success, use **MGU Store > Settings > Restart head unit**. If using an
-   Android box, fully restart the box after MGU has booted. Allow one minute for
-   the CarPlay startup health check.
-5. Keep the backup in `CarPlay-Multitouch-Backups/` on the stick privately. It
-   contains CarPlay files/configuration, **not a full MGU image**. BimmerCode is
-   a separate coding backup.
-6. To revert, use **Store > Installed > CarPlay Multitouch - iDrive 7 > Remove**,
-   then fully restart the head unit again. Do not mix the Store and ENET
-   installers; remove the existing edition with its own installer first.
 
 ## Install
 
