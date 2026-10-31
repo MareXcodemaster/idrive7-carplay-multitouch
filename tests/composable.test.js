@@ -98,9 +98,12 @@ function real(){
  checks.push('real: the manager selects the composed executable in both orders');
  function tamper(u,offset,why){
   var file=path.join(u.dir,'carplay'),rec=JSON.parse(fs.readFileSync(path.join(u.dir,'composed.json'))),keep=fs.readFileSync(file),bad=Buffer.from(keep);
+  // the copy, its record and the commit point all made to agree, so only the byte comparison can refuse it
+  var exp=path.join(u.dir,'expected.sha256'),expKeep=fs.readFileSync(exp,'utf8');
   bad[offset]^=1;fs.writeFileSync(file,bad);var recKeep=JSON.stringify(rec);rec.candidate.sha256=sha(bad);fs.writeFileSync(path.join(u.dir,'composed.json'),JSON.stringify(rec));
+  fs.writeFileSync(exp,expKeep.split(sha(keep)).join(sha(bad)));
   var s=u.manager.prepare();assert.strictEqual(s.selected,'own');assert.strictEqual(s.composed,why);
-  fs.writeFileSync(file,keep);fs.writeFileSync(path.join(u.dir,'composed.json'),recKeep);
+  fs.writeFileSync(file,keep);fs.writeFileSync(path.join(u.dir,'composed.json'),recKeep);fs.writeFileSync(exp,expKeep);
  }
  tamper(a,patch.edits[0].offset,'differs_outside_other_regions');
  tamper(a,patch.edits[1].offset+2,'differs_outside_other_regions');

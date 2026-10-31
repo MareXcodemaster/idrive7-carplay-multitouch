@@ -62,6 +62,7 @@ function fixture(){
    if(!fs.existsSync(composer))fs.mkdirSync(composer);
    fs.writeFileSync(path.join(root,'carplay'),own);fs.writeFileSync(path.join(root,'install.json'),JSON.stringify(cfg));
    fs.writeFileSync(path.join(composer,'carplay'),composed);fs.writeFileSync(path.join(composer,'composed.json'),JSON.stringify(record));
+   fs.writeFileSync(path.join(composer,'expected.sha256'),record.base.sha256+'  /usr/bin/carplay\n'+record.candidate.sha256+'  '+path.join(composer,'carplay')+'\n');
    return {own:own,composed:composed,record:record,sha:hash(composed),path:path.join(composer,'carplay')};
   }};
 }
@@ -102,6 +103,7 @@ test('a composition from another factory file keeps the installed copy',function
 test('a composition registered with another manifest keeps the installed copy',function(){var f=fixture();f.compose(null,'c'.repeat(64));ownSelected(f,'patch_not_in_composition');});
 test('an installation from 0.1.0 to 0.2.2 never selects a composition',function(){var f=fixture();f.compose(null,null);ownSelected(f,'not_registered_by_this_installation');});
 test('a writable composer folder keeps the installed copy',function(){var f=fixture(),c=f.compose();f.data.modes[path.dirname(c.path)]=511;ownSelected(f,'composition_unreadable');});
+test('a composition not committed by the composer keeps the installed copy',function(){var f=fixture(),c=f.compose(),e=path.join(path.dirname(c.path),'expected.sha256');fs.unlinkSync(e);ownSelected(f,'not_committed');f.compose();fs.writeFileSync(e,'x  /usr/bin/carplay\n');ownSelected(f,'not_committed');});
 test('an unreadable record keeps the installed copy',function(){var f=fixture(),c=f.compose();fs.writeFileSync(path.join(path.dirname(c.path),'composed.json'),'{');ownSelected(f,'composition_unreadable');});
 test('a composition is never selected when the installed copy fails its checks',function(){var f=fixture();f.compose();f.data.originalHash='changed';var r=f.manager.prepare();assert.strictEqual(r.reason,'factory_hash_changed');assert(!f.selected());});
 test('a composition is never selected while disabled',function(){var f=fixture();f.compose();fs.writeFileSync(path.join(f.root,'disabled.json'),'{}');assert.strictEqual(f.manager.prepare().reason,'disabled');assert(!f.selected());});

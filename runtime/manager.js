@@ -127,7 +127,13 @@ function createManager(deps){
    if(!exists(record)||!exists(composedPath))return {reason:'no_composition'};
    safeFile(record);safeFile(composedPath);
    var composed=f.readFileSync(composedPath),hashes={original:sha(original),composed:crypto.createHash('sha256').update(composed).digest('hex')};
-   var why=composedProblem(f.readFileSync(candidate),composed,readJson(record),cfg.composableManifestSha256,hashes,deps.geometry);
+   var rec=readJson(record),why=composedProblem(f.readFileSync(candidate),composed,rec,cfg.composableManifestSha256,hashes,deps.geometry);
+   // The composer's commit point: written last, it names exactly this factory executable and this composition.
+   var expected=path.join(composer,'expected.sha256');
+   if(!why){
+    if(!exists(expected))why='not_committed';
+    else{safeFile(expected);if(f.readFileSync(expected,'utf8')!==rec.base.sha256+'  '+original+'\n'+rec.candidate.sha256+'  '+composedPath+'\n')why='not_committed';}
+   }
    return why?{reason:why}:{path:composedPath,sha256:hashes.composed};
   }catch(e){return {reason:'composition_unreadable',error:String(e.message||e)};}
  }

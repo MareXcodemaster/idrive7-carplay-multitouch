@@ -5,15 +5,17 @@
 - Works with another CarPlay patch through a CarPlay patch composer
   (mgu-deploy's `carplay-patch`): installation registers this patch as a
   manifest (`patch/composable.js`), and at startup the manager selects the
-  composed executable only when it equals the verified multitouch copy outside
-  the other patch's declared regions; otherwise the multitouch copy starts. The
+  composed executable only when the composer committed it and it equals the
+  verified multitouch copy outside the other patch's declared regions;
+  otherwise the multitouch copy starts. The
   startup guard and health check cover whichever was selected.
   [docs/COMPOSABLE.md](docs/COMPOSABLE.md).
 - Preflight accepts the composer's launcher drop-in (exact name and marker);
   every other drop-in is still refused. Installation and removal never touch it.
 - Installations made by 0.1.0 to 0.2.2 are not migrated or changed; uninstall
-  removes them as before. Installation metadata version is 0.3.0, so an existing
-  installation is removed before this version is installed.
+  removes them as before. Installation metadata version is 0.3.0: installing
+  over an existing installation is refused, so the update is uninstall, then
+  install.
 - No change to the touch-report format, patch payload, supported firmware or the
   multitouch-only startup, hash and health checks.
 

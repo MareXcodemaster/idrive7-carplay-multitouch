@@ -94,7 +94,11 @@ The drop-in sorts after the composer's (`60-` after `50-`), so systemd uses its
      installed copy byte for byte everywhere except inside the other patches'
      declared regions; those regions lie within the factory file, overlap none
      of this patch's edits or payload, and their recorded original and written
-     bytes match the two files. The other patches append nothing.
+     bytes match the two files. The other patches append nothing;
+   - the composer committed it: its `expected.sha256`, which the composer
+     writes last and deletes first when it removes a patch, names exactly
+     `/usr/bin/carplay` with the factory hash and this composed file with its
+     hash, so a composition stopped half way is never selected.
 
 `/run/mgu-carplay-multitouch/selected` holds the installed copy's SHA-256 (as
 before) or `composed <sha256>`; `pending.json` records the composed path and
