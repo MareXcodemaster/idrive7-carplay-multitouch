@@ -74,7 +74,8 @@ function real(){
   fs.writeFileSync(p('lib/systemd/system/carplay.service'),'[Service]\nExecStart=/usr/bin/carplay -c /etc/cinemo/cinemo_options.xml\n');
   var launcher=p('etc/systemd/system/carplay.service.d/60-mgu-carplay-multitouch.conf');
   var m=JSON.parse(composable.toManifest(patch));m.launcher=launcher;var manifest=Buffer.from(JSON.stringify(m,null,2)+'\n');
-  var cfg={target:p('usr/bin/carplay'),dir:p('var/opt/mgu-carplay-patch'),dropin:p('etc/systemd/system/carplay.service.d/50-mgu-carplay-patch.conf'),stockUnit:p('lib/systemd/system/carplay.service'),
+  var cfg={target:p('usr/bin/carplay'),dir:p('var/opt/mgu-carplay-patch'),dropin:p('etc/systemd/system/carplay.service.d/50-mgu-carplay-patch.conf'),
+   shutdownDropin:p('etc/systemd/system/var-opt-ro.service.d/50-mgu-carplay-guard.conf'),run:p('run/mgu-carplay-patch'),stockUnit:p('lib/systemd/system/carplay.service'),
    overrides:[p('etc/systemd/system/carplay.service')],dropinDirs:[p('etc/systemd/system/carplay.service.d')],proc:p('proc')};
   var api=C.create(cfg,{rootfsWindow:function(ops){ops.forEach(function(op){if(op.type==='mkdir')mkdirp(op.path);else if(op.type==='copy')fs.writeFileSync(op.path,op.data,{mode:op.mode});else if(op.type==='delete')fs.unlinkSync(op.path);});},daemonReload:function(){}});
   fs.writeFileSync(p('pkg/carplay'),own,{mode:493});
