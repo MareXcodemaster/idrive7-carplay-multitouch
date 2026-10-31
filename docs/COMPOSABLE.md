@@ -102,9 +102,10 @@ The drop-in sorts after the composer's (`60-` after `50-`), so systemd uses its
    - the composer's boot-loop guard approved this start: its token
      `/run/mgu-carplay-patch/go`, which its own `ExecStartPre` writes before
      this patch's, equals that commit point. The guard holds back its
-     approval after the composed executable crashed at two starts in a row,
-     until it is enabled again, so this patch then starts its installed
-     copy.
+     approval after the composed executable crashed twice (or three of its
+     starts ended unrecorded before running two minutes) with no healthy
+     start between them, until it is enabled again, so this patch then
+     starts its installed copy.
 
 Both startup guards apply to a composed executable, and each can only move
 towards a safer executable: this patch's own (a start not verified within
