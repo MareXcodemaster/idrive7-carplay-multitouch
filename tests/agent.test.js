@@ -81,8 +81,17 @@ test('with mgu-deploy uninstall unregisters after the drop-in is gone and before
  var f=fixture({deploy:true});f.api.install();f.calls.length=0;var r=f.api.uninstall(),c=f.deployCalls();
  assert.strictEqual(c.length,1);assert.deepEqual(c[0][1],[DEPLOY,'carplay-patch','remove','idrive7-carplay-multitouch']);assert(!c[0][2].drop);assert(c[0][2].installed);
  assert.strictEqual(r.registration.state,'unregistered');assert(!f.dirs[f.root]);});
-test('a failed unregistration still removes the installation and says what to run',function(){
- var f=fixture({deploy:true});f.api.install();f.state.deploy=1;var r=f.api.uninstall();assert.strictEqual(r.registration.state,'failed');assert(/carplay-patch remove/.test(r.registration.advice));assert(!f.dirs[f.root]&&!f.files[f.drop]);});
+function failedUnregistration(code){
+ var f=fixture({deploy:true});f.api.install();var drop=Buffer.from(f.files[f.drop]),kept=Object.keys(f.files).filter(function(p){return p.indexOf(f.root+'/')===0;}).sort();
+ f.state.deploy=code;f.calls.length=0;assert.throws(function(){f.api.uninstall();},/Unregistering from the CarPlay patch composer failed: mgu-deploy: .*The multitouch drop-in is back and nothing else was removed; run uninstall again/);
+ assert(f.files[f.drop].equals(drop));assert(f.dirs[f.root]);assert.deepEqual(Object.keys(f.files).filter(function(p){return p.indexOf(f.root+'/')===0;}).sort(),kept);assert(f.state.ro);
+ var order=f.calls.map(function(c){return c[0]==='/bin/sh'?'remove':c[0]==='systemctl'?'reload:'+(c[2].drop?'with':'without'):null;}).filter(Boolean);
+ assert.deepEqual(order,['reload:without','remove','reload:with']);
+ f.state.deploy=0;var r=f.api.uninstall();assert.strictEqual(r.registration.state,'unregistered');assert(!f.dirs[f.root]&&!f.files[f.drop]);}
+test('a composer failing to unregister puts the drop-in back, keeps everything and fails the uninstall',function(){failedUnregistration(1);});
+test('a composer refusing to unregister (another run holds its lock) is handled the same way',function(){failedUnregistration(2);});
+test('without mgu-deploy uninstall deletes the registration file as before',function(){
+ var f=fixture();f.api.install();assert(f.files[REGISTERED]);var r=f.api.uninstall();assert.strictEqual(r.registration.via,'file');assert.strictEqual(r.registration.state,'unregistered');assert(!f.files[REGISTERED]);assert(!f.dirs[f.root]);assert(!f.deployCalls().length);});
 test('an installation from 0.1.0 to 0.2.2 uninstalls without touching the composer',function(){
  var f=fixture({deploy:true});legacyInstall(f);f.files[REGISTERED]=Buffer.from('someone');var r=f.api.uninstall();
  assert.strictEqual(r.registration.state,'never-registered');assert(!f.deployCalls().length);assert(f.files[REGISTERED]);assert(!f.dirs[f.root]&&!f.files[f.drop]);assert(f.state.ro);});

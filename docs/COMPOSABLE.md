@@ -44,6 +44,10 @@ Everything earlier versions install, plus:
   composer installed later reads. A refused or failed registration is reported
   in the result (`registration`) and the installation stays multitouch-only.
 
+A new multitouch-only installation without mgu-deploy therefore leaves one file
+outside its own folder: that registration file. It is inert while no composer
+is installed, and uninstall removes it.
+
 Preflight accepts one drop-in besides its own: the composer's
 `/etc/systemd/system/carplay.service.d/50-mgu-carplay-patch.conf`, a regular
 root-owned file whose first line starts with `# mgu-carplay-patch launcher`.
@@ -58,10 +62,16 @@ registered nothing. So:
 
 - **Install:** the drop-in is in place before the manifest is registered.
 - **Uninstall:** the drop-in is removed before the manifest is unregistered
-  (through mgu-deploy when installed, else by deleting the registration file
-  when it is still the one this installation wrote), then the files go. A
-  failed unregistration is reported with the command to run; the removal goes
-  ahead.
+  (through mgu-deploy when it has `carplay-patch`, else by deleting the
+  registration file when it is still the one this installation wrote), then
+  the files go. When mgu-deploy fails or refuses to unregister (for example
+  while another of its runs holds its lock), a composition may still carry this
+  patch: the drop-in is put back with the same bytes, nothing else is removed,
+  and the uninstall fails saying so; run it again.
+
+The composer retries patches it refused earlier when another patch is added or
+removed, so a patch refused while an earlier multitouch installation was
+present joins once this version is installed.
 
 ## Which executable starts
 

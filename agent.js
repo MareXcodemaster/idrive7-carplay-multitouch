@@ -73,7 +73,7 @@ function unregister(info){
  if(!info.composableManifestSha256)return {state:'never-registered'};
  if(exists(DEPLOY)){
   try{return {state:'unregistered',via:'mgu-deploy',output:lastLines(exec('/bin/sh',[DEPLOY,'carplay-patch','remove',ID],120000))};}
-  catch(e){if(!cliLacksComposer(e))return {state:'failed',via:'mgu-deploy',output:cliOutput(e),advice:'Run '+DEPLOY+' carplay-patch remove '+ID};}
+  catch(e){if(!cliLacksComposer(e))return {state:'failed',via:'mgu-deploy',output:cliOutput(e)};}
  }
  if(!exists(REGISTERED))return {state:'not-registered'};
  if(sha(fs.readFileSync(REGISTERED))!==info.composableManifestSha256)return {state:'kept',reason:'The registered manifest is not the one this installation wrote'};
@@ -139,9 +139,19 @@ function uninstall(){
  if(exists(DROP)&&sha(fs.readFileSync(DROP))!==info.dropinSha256)throw Error('Drop-in changed; refusing to remove another configuration');
  var allowed=['carplay','manager.js','install.json','factory-unit.txt','disabled.json','pending.json','health.json','carplay-patch.json'];
  fs.readdirSync(ROOT).forEach(function(n){if(allowed.indexOf(n)<0)throw Error('Unexpected file preserved: '+n);var s=fs.lstatSync(ROOT+'/'+n);if(!s.isFile()||s.isSymbolicLink())throw Error('Unexpected entry preserved: '+n);});
+ var dropBytes=exists(DROP)?fs.readFileSync(DROP):null;
  rootWrite(function(){if(exists(DROP))fs.unlinkSync(DROP);});exec('systemctl',['daemon-reload']);
  // The drop-in is gone before the registration, so a composer never sees it without one.
  var registration=unregister(info);
+ if(registration.state==='failed'){
+  // A composition may still carry this patch: its drop-in, and with it the startup guard, goes back.
+  var why='Unregistering from the CarPlay patch composer failed: '+(registration.output||'no output');
+  if(dropBytes){
+   try{rootWrite(function(){if(exists(DROP+'.new'))fs.unlinkSync(DROP+'.new');write(DROP+'.new',dropBytes,420);fs.renameSync(DROP+'.new',DROP);});exec('systemctl',['daemon-reload']);}
+   catch(restoreError){throw Error(why+'; putting the multitouch drop-in back failed too: '+String(restoreError)+'. Run uninstall again.');}
+  }
+  throw Error(why+'. The multitouch drop-in is back and nothing else was removed; run uninstall again.');
+ }
  allowed.forEach(function(n){if(exists(ROOT+'/'+n))fs.unlinkSync(ROOT+'/'+n);});fs.rmdirSync(ROOT);exec('sync',[]);
  return {state:'removed-for-next-boot',factoryUnchanged:sha(fs.readFileSync('/usr/bin/carplay'))===patch.original.sha256,registration:registration,rootReadOnly:rootReadOnly()};
 }
