@@ -14,7 +14,7 @@ import tarfile
 import uuid
 
 HERE = Path(__file__).resolve().parent
-ASSETS = ['agent.js', 'read-voltage.js', 'patch/patcher.js', 'patch/patch.json',
+ASSETS = ['agent.js', 'read-voltage.js', 'patch/patcher.js', 'patch/patch.json', 'patch/composable.js',
           'runtime/manager.js', 'runtime/60-mgu-carplay-multitouch.conf']
 
 def archive():

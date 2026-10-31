@@ -19,4 +19,6 @@ node patcher.js apply ./original-carplay ./carplay-multitouch
 
 The CLI creates a new output exclusively and refuses to overwrite existing files. Creating a patched copy does not install or activate it. Follow the package's main installation and removal instructions.
 
+`composable.js` writes the same delta as a composable CarPlay patch manifest (`mgu-carplay-patch-v1`) for a CarPlay patch composer: `node composable.js manifest`. See `docs/COMPOSABLE.md`.
+
 `multitouch.c` is the source of the appended payload. `payload.ld` is its linker layout. The package supplies the already-built payload within `patch.json` so applying it does not require a compiler.

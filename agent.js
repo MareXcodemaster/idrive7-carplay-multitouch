@@ -1,10 +1,15 @@
 'use strict';
 // Runs on the MGU as root. Keeps the factory executable intact.
 var fs=require('fs'),path=require('path'),cp=require('child_process'),crypto=require('crypto');
-var patcher=require('./patch/patcher'),patch=require('./patch/patch.json');
+var patcher=require('./patch/patcher'),patch=require('./patch/patch.json'),composable=require('./patch/composable');
 var ROOT='/var/opt/mgu-carplay-multitouch';
 var DROP='/etc/systemd/system/carplay.service.d/60-mgu-carplay-multitouch.conf';
-var ID='idrive7-carplay-multitouch',VERSION='0.1.0';
+var ID='idrive7-carplay-multitouch',VERSION='0.3.0';
+// A CarPlay patch composer's files (mgu-deploy carplay-patch). Read, never written,
+// except this patch's own registration when no composer is installed.
+var COMPOSER='/var/opt/mgu-carplay-patch',REGISTERED=COMPOSER+'/patches/'+ID+'.json';
+var COMPOSER_DROP='/etc/systemd/system/carplay.service.d/50-mgu-carplay-patch.conf',COMPOSER_MARK='# mgu-carplay-patch launcher';
+var DEPLOY='/var/opt/mgu-deploy/mgu-deploy.sh';
 function sha(data){return crypto.createHash('sha256').update(data).digest('hex');}
 function exists(p){try{fs.lstatSync(p);return true;}catch(e){if(e.code==='ENOENT')return false;throw e;}}
 function readJson(p){return exists(p)?JSON.parse(fs.readFileSync(p,'utf8')):null;}
@@ -16,6 +21,12 @@ function rootWrite(action){
  var ro=rootReadOnly();if(ro)exec('mount',['-o','remount,rw','/']);
  try{return action();}finally{try{exec('sync',[]);}finally{if(ro){exec('mount',['-o','remount,ro','/']);if(!rootReadOnly())throw Error('Root filesystem did not return read-only');}}}
 }
+// The composer's own launcher: that exact name, a regular root-owned file, its marker first.
+function composerDropin(p){
+ if(p!==COMPOSER_DROP)return false;
+ var s=fs.lstatSync(p);if(!s.isFile()||s.isSymbolicLink()||s.uid!==0||(s.mode&18))return false;
+ return fs.readFileSync(p,'utf8').split('\n')[0].indexOf(COMPOSER_MARK)===0;
+}
 function preflight(){
  if(process.getuid()!==0)throw Error('Root SSH is required');
  if(process.arch!=='x64'||process.platform!=='linux')throw Error('Only Linux x86-64 MGU is supported');
@@ -25,7 +36,7 @@ function preflight(){
  if(!/^ExecStart=\/usr\/bin\/carplay -c \/etc\/cinemo\/cinemo_options.xml$/m.test(unit)||!/^OnFailure=mediaddpserver_kill.service$/m.test(unit))throw Error('Unsupported factory unit');
  if(exists('/etc/systemd/system/carplay.service')||exists('/run/systemd/system/carplay.service'))throw Error('A full custom CarPlay unit is already installed');
  ['/etc/systemd/system/carplay.service.d','/run/systemd/system/carplay.service.d'].forEach(function(dir){
-  if(exists(dir)){safeDir(dir);fs.readdirSync(dir).filter(function(n){return /\.conf$/.test(n)&&path.join(dir,n)!==DROP;}).forEach(function(n){throw Error('Other CarPlay override present: '+path.join(dir,n));});}
+  if(exists(dir)){safeDir(dir);fs.readdirSync(dir).filter(function(n){var p=path.join(dir,n);return /\.conf$/.test(n)&&p!==DROP&&!composerDropin(p);}).forEach(function(n){throw Error('Other CarPlay override present: '+path.join(dir,n));});}
  });
  return {original:original,unit:unit,originalSha256:sha(original),rootReadOnly:rootReadOnly()};
 }
@@ -35,18 +46,60 @@ function voltage(){
  if(!data.value||data.value.AppErrorType!=='DF_OK'||data.value.STAT_MILLI_VOLT_WERT<13000||data.value.STAT_MILLI_VOLT_WERT>18000)throw Error('Stable supply of at least 13.0 V is required for installation/activation');
  return {time:data.time,millivolts:data.value.STAT_MILLI_VOLT_WERT};
 }
+function lastLines(text){return String(text||'').trim().split('\n').slice(-6).join('\n');}
+function cliOutput(e){return lastLines(String(e.stdout||'')+String(e.stderr||'')||String(e));}
+// An mgu-deploy without carplay-patch: its composer is installed later and reads the file.
+function cliLacksComposer(e){return e.status===2&&/unknown command carplay-patch/.test(String(e.stdout||'')+String(e.stderr||''));}
+/* Registers this patch with a CarPlay patch composer, after its drop-in is in place:
+ * through mgu-deploy when it composes, else as a file a composer installed later
+ * reads. A refusal or failure leaves the multitouch-only installation working. */
+function register(file){
+ if(exists(DEPLOY)){
+  try{return {state:'registered',via:'mgu-deploy',output:lastLines(exec('/bin/sh',[DEPLOY,'carplay-patch','add',file],120000))};}
+  catch(e){if(!cliLacksComposer(e))return {state:e.status===2?'refused':'failed',via:'mgu-deploy',output:cliOutput(e)};}
+ }
+ try{
+  var data=fs.readFileSync(file);
+  [COMPOSER,COMPOSER+'/patches'].forEach(function(d){if(!exists(d))fs.mkdirSync(d,493);safeDir(d);});
+  if(exists(REGISTERED)&&sha(fs.readFileSync(REGISTERED))===sha(data))return {state:'registered',via:'file'};
+  if(exists(REGISTERED+'.new'))fs.unlinkSync(REGISTERED+'.new');
+  write(REGISTERED+'.new',data,420);fs.renameSync(REGISTERED+'.new',REGISTERED);
+  return {state:'registered',via:'file'};
+ }catch(e){return {state:'failed',via:'file',error:String(e)};}
+}
+/* Removes this patch's registration, once its drop-in is gone. An installation that
+ * never registered (0.1.0 to 0.2.2) leaves the composer alone. */
+function unregister(info){
+ if(!info.composableManifestSha256)return {state:'never-registered'};
+ if(exists(DEPLOY)){
+  try{return {state:'unregistered',via:'mgu-deploy',output:lastLines(exec('/bin/sh',[DEPLOY,'carplay-patch','remove',ID],120000))};}
+  catch(e){if(!cliLacksComposer(e))return {state:'failed',via:'mgu-deploy',output:cliOutput(e),advice:'Run '+DEPLOY+' carplay-patch remove '+ID};}
+ }
+ if(!exists(REGISTERED))return {state:'not-registered'};
+ if(sha(fs.readFileSync(REGISTERED))!==info.composableManifestSha256)return {state:'kept',reason:'The registered manifest is not the one this installation wrote'};
+ fs.unlinkSync(REGISTERED);return {state:'unregistered',via:'file'};
+}
+function composerStatus(){
+ var record=null;try{record=readJson(COMPOSER+'/composed.json');}catch(e){record={unreadable:String(e)};}
+ return {cli:exists(DEPLOY),registered:exists(REGISTERED),dropin:exists(COMPOSER_DROP),
+  composed:record&&Array.isArray(record.patches)?record.patches.map(function(p){return p.id+' '+p.version;}):record};
+}
 function status(){
  var text=exec('systemctl',['show','carplay.service','-p','MainPID','-p','ActiveState','-p','SubState','-p','FragmentPath','-p','DropInPaths']);
  var match=/^MainPID=(\d+)$/m.exec(text),pid=match?Number(match[1]):0,exe=pid?fs.readlinkSync('/proc/'+pid+'/exe'):null;
+ var running=exe===ROOT+'/carplay'?'own':exe===COMPOSER+'/carplay'||exe===COMPOSER+'/carplay (deleted)'?'composed':exe?'factory':null;
  return {package:ID,installed:exists(DROP),metadata:readJson(ROOT+'/install.json'),service:text,exe:exe,
-  activePatched:exe===ROOT+'/carplay',processSha256:pid?sha(fs.readFileSync('/proc/'+pid+'/exe')):null,
-  disabled:readJson(ROOT+'/disabled.json'),pending:readJson(ROOT+'/pending.json'),health:readJson(ROOT+'/health.json'),rootReadOnly:rootReadOnly()};
+  activePatched:running==='own'||running==='composed',activeBinary:running,processSha256:pid?sha(fs.readFileSync('/proc/'+pid+'/exe')):null,
+  disabled:readJson(ROOT+'/disabled.json'),pending:readJson(ROOT+'/pending.json'),health:readJson(ROOT+'/health.json'),composer:composerStatus(),rootReadOnly:rootReadOnly()};
 }
 function install(){
  var check=preflight(),power=voltage(),drop=fs.readFileSync(path.join(__dirname,'runtime/60-mgu-carplay-multitouch.conf'));
+ var manifest=composable.toManifest(patch);
  if(exists(ROOT)){
   safeDir(ROOT);var prior=readJson(ROOT+'/install.json');
-  if(prior&&prior.package===ID&&prior.version===VERSION&&exists(DROP)&&sha(fs.readFileSync(DROP))===sha(drop)&&sha(fs.readFileSync(ROOT+'/manager.js'))===sha(fs.readFileSync(path.join(__dirname,'runtime/manager.js')))&&patcher.verifyPatched(fs.readFileSync(ROOT+'/carplay'),patch))return {state:'already-installed',voltage:power,status:status()};
+  if(prior&&prior.package===ID&&prior.version===VERSION&&exists(DROP)&&sha(fs.readFileSync(DROP))===sha(drop)&&sha(fs.readFileSync(ROOT+'/manager.js'))===sha(fs.readFileSync(path.join(__dirname,'runtime/manager.js')))&&patcher.verifyPatched(fs.readFileSync(ROOT+'/carplay'),patch)&&
+   prior.composableManifestSha256===sha(manifest)&&exists(ROOT+'/carplay-patch.json')&&sha(fs.readFileSync(ROOT+'/carplay-patch.json'))===sha(manifest))
+   return {state:'already-installed',voltage:power,registration:register(ROOT+'/carplay-patch.json'),status:status()};
   throw Error('Installation directory already exists. Inspect/remove the existing installation first.');
  }
  if(exists(DROP))throw Error('Drop-in already exists');
@@ -56,8 +109,10 @@ function install(){
   var candidate=patcher.apply(check.original,patch);
   write(staging+'/carplay',candidate,493);
   write(staging+'/manager.js',fs.readFileSync(path.join(__dirname,'runtime/manager.js')),420);
+  write(staging+'/carplay-patch.json',manifest,420);
   var metadata={package:ID,version:VERSION,installedAt:new Date().toISOString(),originalSha256:patch.original.sha256,candidateSha256:patch.candidate.sha256,
-   metricsAddress:patch.metricsAddress,reportBytes:12,descriptorBytes:133,dropinSha256:sha(drop),managerSha256:sha(fs.readFileSync(staging+'/manager.js'))};
+   metricsAddress:patch.metricsAddress,reportBytes:12,descriptorBytes:133,dropinSha256:sha(drop),managerSha256:sha(fs.readFileSync(staging+'/manager.js')),
+   composableManifestSha256:sha(manifest)};
   write(staging+'/install.json',JSON.stringify(metadata,null,2)+'\n');
   write(staging+'/factory-unit.txt',check.unit);
   fs.renameSync(staging,ROOT);committed=true;exec('sync',[]);
@@ -68,23 +123,27 @@ function install(){
   exec('systemctl',['daemon-reload']);
   var effective=exec('systemctl',['show','carplay.service','-p','ExecStart','-p','ExecStartPre','-p','DropInPaths','-p','KillSignal','-p','OnFailure']);
   if(effective.indexOf(DROP)<0||effective.indexOf(ROOT+'/manager.js')<0||!/^KillSignal=9$/m.test(effective)||effective.indexOf('mediaddpserver_kill.service')<0)throw Error('Effective unit validation failed');
-  return {state:'installed-for-next-boot',voltage:power,originalUnchanged:sha(fs.readFileSync('/usr/bin/carplay'))===patch.original.sha256,effective:effective,status:status()};
  }catch(error){
   if(unitWritten){try{rootWrite(function(){if(sha(fs.readFileSync(DROP))===sha(drop))fs.unlinkSync(DROP);});exec('systemctl',['daemon-reload']);}catch(rollbackError){throw Error(String(error)+'; drop-in rollback failed: '+String(rollbackError));}}
   // Keep staged diagnostic files on a failed install; no unrelated files are removed.
   if(committed&&!unitWritten)write(ROOT+'/disabled.json',JSON.stringify({reason:'installation_incomplete'}));
   throw error;
  }
+ // The drop-in that starts a composed executable is in place before the registration.
+ var registration=register(ROOT+'/carplay-patch.json');
+ return {state:'installed-for-next-boot',voltage:power,originalUnchanged:sha(fs.readFileSync('/usr/bin/carplay'))===patch.original.sha256,effective:effective,registration:registration,status:status()};
 }
 function uninstall(){
  if(process.getuid()!==0)throw Error('Root SSH is required');
  var info=readJson(ROOT+'/install.json');if(!info||info.package!==ID)throw Error('No owned installation found');safeDir(ROOT);
  if(exists(DROP)&&sha(fs.readFileSync(DROP))!==info.dropinSha256)throw Error('Drop-in changed; refusing to remove another configuration');
- var allowed=['carplay','manager.js','install.json','factory-unit.txt','disabled.json','pending.json','health.json'];
+ var allowed=['carplay','manager.js','install.json','factory-unit.txt','disabled.json','pending.json','health.json','carplay-patch.json'];
  fs.readdirSync(ROOT).forEach(function(n){if(allowed.indexOf(n)<0)throw Error('Unexpected file preserved: '+n);var s=fs.lstatSync(ROOT+'/'+n);if(!s.isFile()||s.isSymbolicLink())throw Error('Unexpected entry preserved: '+n);});
  rootWrite(function(){if(exists(DROP))fs.unlinkSync(DROP);});exec('systemctl',['daemon-reload']);
+ // The drop-in is gone before the registration, so a composer never sees it without one.
+ var registration=unregister(info);
  allowed.forEach(function(n){if(exists(ROOT+'/'+n))fs.unlinkSync(ROOT+'/'+n);});fs.rmdirSync(ROOT);exec('sync',[]);
- return {state:'removed-for-next-boot',factoryUnchanged:sha(fs.readFileSync('/usr/bin/carplay'))===patch.original.sha256,rootReadOnly:rootReadOnly()};
+ return {state:'removed-for-next-boot',factoryUnchanged:sha(fs.readFileSync('/usr/bin/carplay'))===patch.original.sha256,registration:registration,rootReadOnly:rootReadOnly()};
 }
 function queueReboot(){
  var code="setTimeout(function(){require('child_process').spawn('systemctl',['reboot'],{detached:true,stdio:'ignore'}).unref();},1500);";

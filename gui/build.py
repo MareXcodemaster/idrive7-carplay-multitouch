@@ -5,7 +5,7 @@ HERE=Path(__file__).resolve().parent;PACKAGE=HERE.parent
 def build(output=None):
  out=Path(output).resolve() if output else PACKAGE.parents[1]/'CarPlay-Multitouch-Installer'
  out.mkdir(parents=True,exist_ok=True)
- assets=['agent.js','read-voltage.js','patch/patcher.js','patch/patch.json','runtime/manager.js','runtime/60-mgu-carplay-multitouch.conf','gui/backend.js']
+ assets=['agent.js','read-voltage.js','patch/patcher.js','patch/patch.json','patch/composable.js','runtime/manager.js','runtime/60-mgu-carplay-multitouch.conf','gui/backend.js']
  resource=HERE/'payload.tar'
  with tarfile.open(resource,'w',format=tarfile.USTAR_FORMAT) as tar:
   for name in assets:
