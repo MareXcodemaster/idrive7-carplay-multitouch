@@ -4,7 +4,7 @@ var fs=require('fs'),path=require('path'),crypto=require('crypto'),cp=require('c
 var agent=require('../agent'),patch=require('../patch/patch.json');
 var ROOT='/var/opt/mgu-carplay-multitouch',DROP='/etc/systemd/system/carplay.service.d/60-mgu-carplay-multitouch.conf';
 var FILES=['usr/bin/carplay','lib/systemd/system/carplay.service','etc/systemd/system/carplay.service.d/60-mgu-carplay-multitouch.conf'];
-['carplay','manager.js','install.json','factory-unit.txt','disabled.json','pending.json','health.json'].forEach(function(n){FILES.push('var/opt/mgu-carplay-multitouch/'+n);});
+['carplay','manager.js','install.json','factory-unit.txt','disabled.json','pending.json','health.json','carplay-patch.json'].forEach(function(n){FILES.push('var/opt/mgu-carplay-multitouch/'+n);});
 function sha(b){return crypto.createHash('sha256').update(b).digest('hex');}
 function exists(p){try{fs.lstatSync(p);return true;}catch(e){if(e.code==='ENOENT')return false;throw e;}}
 function safe(p){var s=fs.lstatSync(p);if(!s.isFile()||s.isSymbolicLink()||s.uid!==0||(s.mode&18))throw Error('Unsafe installation file: '+p);return s;}

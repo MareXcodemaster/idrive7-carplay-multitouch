@@ -43,6 +43,7 @@ Screenshots use example connection data, not private vehicle identifiers.
 | Factory CarPlay connected directly to an iPhone | **Not tested** |
 | Three or five simultaneous fingers | Not implemented |
 | Other CarPlay executable hashes | Refused by the installer |
+| Another CarPlay patch through a CarPlay patch composer | Local tests only; [details](docs/COMPOSABLE.md) |
 
 The tested MGU reported `P18_23w44.2-1-3`. Model year, vehicle model, or the label “iDrive 7” does not establish compatibility. The original `/usr/bin/carplay` must have both:
 
@@ -115,6 +116,11 @@ The installer removes its own override and installed files. The next MGU boot us
 - Patch files and the startup guard under `/var/opt/mgu-carplay-multitouch`.
 - An owned drop-in at `/etc/systemd/system/carplay.service.d/60-mgu-carplay-multitouch.conf`.
 - A separate patched CarPlay executable, generated locally from the matching original.
+- This patch as a CarPlay patch manifest, registered with a CarPlay patch composer when one is installed (else as a file a composer installed later reads).
+
+## Another CarPlay patch
+
+With another CarPlay patch registered with a CarPlay patch composer (mgu-deploy's `carplay-patch`), the composer builds one executable from the factory file and both patches, and multitouch starts it only after verifying it equals the multitouch copy everywhere outside the other patch's declared regions; otherwise the multitouch copy starts. The same startup guard and health check apply. Installations made by 0.1.0 to 0.2.2 are not changed: a composer refuses to combine with them until they are removed and installed again with this version. [How it works and what is verified](docs/COMPOSABLE.md).
 
 The override uses `SIGKILL` for intentional service stops because the tested factory process crashed during SIGTERM teardown. Normal OEM failure handling remains enabled. Do not stop or restart this service while driving.
 
@@ -144,6 +150,7 @@ Or run them directly:
 
 ```sh
 node tests/patcher.test.js
+node tests/composable.test.js
 node tests/agent.test.js
 node runtime/test-manager.js
 ```
