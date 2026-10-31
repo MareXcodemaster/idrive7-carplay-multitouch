@@ -81,8 +81,10 @@ function real(){
   var meta=JSON.parse(JSON.stringify(mod.EXPECTED));meta.composableManifestSha256=sha(manifest);fs.writeFileSync(p('pkg/install.json'),JSON.stringify(meta));
   var f=Object.create(fs);f.lstatSync=function(file){var s=fs.lstatSync(file);return {uid:0,mode:s.mode&~18,isFile:function(){return s.isFile();},isDirectory:function(){return s.isDirectory();},isSymbolicLink:function(){return s.isSymbolicLink();}};};
   f.readFileSync=function(file,enc){return file==='/proc/sys/kernel/random/boot_id'?'11111111-1111-1111-1111-111111111111\n':fs.readFileSync(file,enc);};
-  var manager=mod.createManager({fs:f,process:{env:{},getuid:function(){return 0;}},root:p('pkg'),run:p('run'),original:p('usr/bin/carplay'),composer:cfg.dir});
+  var manager=mod.createManager({fs:f,process:{env:{},getuid:function(){return 0;}},root:p('pkg'),run:p('run'),original:p('usr/bin/carplay'),composer:cfg.dir,composerRun:p('run/mgu-carplay-patch')});
   return {R:R,p:p,api:api,manager:manager,launcher:launcher,manifest:manifest,dir:cfg.dir,
+   // the composer's boot-loop guard approving this start (its ExecStartPre, before this patch's)
+   approve:function(){mkdirp(p('run/mgu-carplay-patch'));fs.writeFileSync(p('run/mgu-carplay-patch/go'),fs.readFileSync(path.join(cfg.dir,'expected.sha256')));},
    installLauncher:function(){fs.writeFileSync(launcher,fs.readFileSync(path.join(base,'runtime/60-mgu-carplay-multitouch.conf')));}};
  }
  var a=unit(),b=unit(),r;
@@ -94,16 +96,19 @@ function real(){
  var ca=fs.readFileSync(path.join(a.dir,'carplay')),cb=fs.readFileSync(path.join(b.dir,'carplay'));
  checks.push('real: both orders compose the same executable ('+sha(ca)+')');
  assert(ca.equals(cb));assert.strictEqual(ca.length,patch.candidate.size);
- [a,b].forEach(function(u,i){var s=u.manager.prepare();assert.strictEqual(s.selected,'composed',JSON.stringify(s));});
+ [a,b].forEach(function(u,i){u.approve();var s=u.manager.prepare();assert.strictEqual(s.selected,'composed',JSON.stringify(s));});
+ fs.unlinkSync(a.p('run/mgu-carplay-patch/go'));
+ assert.strictEqual(a.manager.prepare().composed,'guard_not_approved');a.approve();
+ checks.push('real: without the boot-loop guard\'s approval of this start the installed copy starts');
  checks.push('real: the manager selects the composed executable in both orders');
  function tamper(u,offset,why){
   var file=path.join(u.dir,'carplay'),rec=JSON.parse(fs.readFileSync(path.join(u.dir,'composed.json'))),keep=fs.readFileSync(file),bad=Buffer.from(keep);
   // the copy, its record and the commit point all made to agree, so only the byte comparison can refuse it
   var exp=path.join(u.dir,'expected.sha256'),expKeep=fs.readFileSync(exp,'utf8');
   bad[offset]^=1;fs.writeFileSync(file,bad);var recKeep=JSON.stringify(rec);rec.candidate.sha256=sha(bad);fs.writeFileSync(path.join(u.dir,'composed.json'),JSON.stringify(rec));
-  fs.writeFileSync(exp,expKeep.split(sha(keep)).join(sha(bad)));
+  fs.writeFileSync(exp,expKeep.split(sha(keep)).join(sha(bad)));u.approve();
   var s=u.manager.prepare();assert.strictEqual(s.selected,'own');assert.strictEqual(s.composed,why);
-  fs.writeFileSync(file,keep);fs.writeFileSync(path.join(u.dir,'composed.json'),recKeep);fs.writeFileSync(exp,expKeep);
+  fs.writeFileSync(file,keep);fs.writeFileSync(path.join(u.dir,'composed.json'),recKeep);fs.writeFileSync(exp,expKeep);u.approve();
  }
  tamper(a,patch.edits[0].offset,'differs_outside_other_regions');
  tamper(a,patch.edits[1].offset+2,'differs_outside_other_regions');

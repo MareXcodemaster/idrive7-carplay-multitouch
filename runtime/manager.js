@@ -12,7 +12,7 @@
  */
 var fs=require('fs'),path=require('path'),crypto=require('crypto'),cp=require('child_process');
 var ROOT='/var/opt/mgu-carplay-multitouch',RUN='/run/mgu-carplay-multitouch';
-var ORIGINAL='/usr/bin/carplay',COMPOSER='/var/opt/mgu-carplay-patch',PATCH_ID='idrive7-carplay-multitouch';
+var ORIGINAL='/usr/bin/carplay',COMPOSER='/var/opt/mgu-carplay-patch',COMPOSER_RUN='/run/mgu-carplay-patch',PATCH_ID='idrive7-carplay-multitouch';
 var EXPECTED={originalSha256:'ddb33e33161387c6479c391684b3d019b0de54ecfcee8d6877eca94aa62f3e50',
  candidateSha256:'2a009e6afe22f8f385b164ec9e2a7c2aa22b1c1c3ac2110d04f80715dc2c01de',metricsAddress:5637648,reportBytes:12,descriptorBytes:133};
 // Where this patch writes: program header, two call sites, the appended payload.
@@ -71,7 +71,7 @@ function composedProblem(own,composed,record,manifestSha256,hashes,geometry){
 function createManager(deps){
  deps=deps||{};
  var f=deps.fs||fs,child=deps.cp||cp,proc=deps.process||process;
- var root=deps.root||ROOT,run=deps.run||RUN,original=deps.original||ORIGINAL,composer=deps.composer||COMPOSER;
+ var root=deps.root||ROOT,run=deps.run||RUN,original=deps.original||ORIGINAL,composer=deps.composer||COMPOSER,composerRun=deps.composerRun||COMPOSER_RUN;
  var now=deps.now||function(){return new Date().toISOString();};
  var timeout=deps.setTimeout||setTimeout,candidate=path.join(root,'carplay'),composedPath=path.join(composer,'carplay');
  var sha=deps.sha||function(file){return crypto.createHash('sha256').update(f.readFileSync(file)).digest('hex');};
@@ -134,6 +134,10 @@ function createManager(deps){
     if(!exists(expected))why='not_committed';
     else{safeFile(expected);if(f.readFileSync(expected,'utf8')!==rec.base.sha256+'  '+original+'\n'+rec.candidate.sha256+'  '+composedPath+'\n')why='not_committed';}
    }
+   // The composer's boot-loop guard approved this start: its token, written by its ExecStartPre before this one, equals the commit point.
+   // Without it (the guard holds the factory executable after crashes, or did not run) the installed copy starts.
+   var approval=path.join(composerRun,'go');
+   if(!why&&(!exists(approval)||f.readFileSync(approval,'utf8')!==f.readFileSync(expected,'utf8')))why='guard_not_approved';
    return why?{reason:why}:{path:composedPath,sha256:hashes.composed};
   }catch(e){return {reason:'composition_unreadable',error:String(e.message||e)};}
  }

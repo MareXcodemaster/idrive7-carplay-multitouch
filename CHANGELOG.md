@@ -5,7 +5,8 @@
 - Works with another CarPlay patch through a CarPlay patch composer
   (mgu-deploy's `carplay-patch`): installation registers this patch as a
   manifest (`patch/composable.js`), and at startup the manager selects the
-  composed executable only when the composer committed it and it equals the
+  composed executable only when the composer committed it, its boot-loop
+  guard approved the start, and it equals the
   verified multitouch copy outside the other patch's declared regions;
   otherwise the multitouch copy starts. The
   startup guard and health check cover whichever was selected.

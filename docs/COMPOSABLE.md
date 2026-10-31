@@ -98,7 +98,19 @@ The drop-in sorts after the composer's (`60-` after `50-`), so systemd uses its
    - the composer committed it: its `expected.sha256`, which the composer
      writes last and deletes first when it removes a patch, names exactly
      `/usr/bin/carplay` with the factory hash and this composed file with its
-     hash, so a composition stopped half way is never selected.
+     hash, so a composition stopped half way is never selected;
+   - the composer's boot-loop guard approved this start: its token
+     `/run/mgu-carplay-patch/go`, which its own `ExecStartPre` writes before
+     this patch's, equals that commit point. The guard holds back its
+     approval after the composed executable crashed at two starts in a row,
+     until it is enabled again, so this patch then starts its installed
+     copy.
+
+Both startup guards apply to a composed executable, and each can only move
+towards a safer executable: this patch's own (a start not verified within
+the first minute, or a failed service result, disables the patch and the
+factory executable starts, until it is armed again) and the composer's (no
+approval: this patch's installed copy starts).
 
 `/run/mgu-carplay-multitouch/selected` holds the installed copy's SHA-256 (as
 before) or `composed <sha256>`; `pending.json` records the composed path and

@@ -10,7 +10,7 @@ var GEOMETRY={originalSize:48,candidateSize:64,ranges:[[4,8],[20,24],[48,64]]};
 function hash(b){return crypto.createHash('sha256').update(b).digest('hex');}
 function fixture(){
  var dir=path.join(base,'case-'+process.pid+'-'+(++seq));fs.mkdirSync(dir);
- var root=path.join(dir,'package'),run=path.join(dir,'run'),composer=path.join(dir,'composer');fs.mkdirSync(root);fs.mkdirSync(run);
+ var root=path.join(dir,'package'),run=path.join(dir,'run'),composer=path.join(dir,'composer'),composerRun=path.join(dir,'composer-run');fs.mkdirSync(root);fs.mkdirSync(run);fs.mkdirSync(composerRun);
  fs.writeFileSync(path.join(root,'carplay'),'own test fixture, not BMW code');
  fs.writeFileSync(path.join(root,'install.json'),JSON.stringify(mod.EXPECTED));
  var data={boot:'11111111-1111-1111-1111-111111111111',pid:123,active:true,running:true,
@@ -43,7 +43,7 @@ function fixture(){
    if(file==='/proc/'+data.pid+'/exe')return data.exeHash||data.candidateHash;
    if(file===path.join(root,'carplay'))return data.candidateHash;
    return hash(fs.readFileSync(file));
-  },setTimeout:function(fn,ms){data.timer={fn:fn,ms:ms};return 1;},composer:composer,geometry:GEOMETRY});
+  },setTimeout:function(fn,ms){data.timer={fn:fn,ms:ms};return 1;},composer:composer,composerRun:composerRun,geometry:GEOMETRY});
  return {manager:manager,data:data,root:root,run:run,proc:proc,
   json:function(name){return JSON.parse(fs.readFileSync(path.join(root,name),'utf8'));},
   exists:function(name){return fs.existsSync(path.join(root,name));},selected:function(){return fs.existsSync(path.join(run,'selected'));},
@@ -63,6 +63,8 @@ function fixture(){
    fs.writeFileSync(path.join(root,'carplay'),own);fs.writeFileSync(path.join(root,'install.json'),JSON.stringify(cfg));
    fs.writeFileSync(path.join(composer,'carplay'),composed);fs.writeFileSync(path.join(composer,'composed.json'),JSON.stringify(record));
    fs.writeFileSync(path.join(composer,'expected.sha256'),record.base.sha256+'  /usr/bin/carplay\n'+record.candidate.sha256+'  '+path.join(composer,'carplay')+'\n');
+   // the composer's boot-loop guard approved this start
+   fs.writeFileSync(path.join(composerRun,'go'),fs.readFileSync(path.join(composer,'expected.sha256')));
    return {own:own,composed:composed,record:record,sha:hash(composed),path:path.join(composer,'carplay')};
   }};
 }
@@ -104,6 +106,7 @@ test('a composition registered with another manifest keeps the installed copy',f
 test('an installation from 0.1.0 to 0.2.2 never selects a composition',function(){var f=fixture();f.compose(null,null);ownSelected(f,'not_registered_by_this_installation');});
 test('a writable composer folder keeps the installed copy',function(){var f=fixture(),c=f.compose();f.data.modes[path.dirname(c.path)]=511;ownSelected(f,'composition_unreadable');});
 test('a composition not committed by the composer keeps the installed copy',function(){var f=fixture(),c=f.compose(),e=path.join(path.dirname(c.path),'expected.sha256');fs.unlinkSync(e);ownSelected(f,'not_committed');f.compose();fs.writeFileSync(e,'x  /usr/bin/carplay\n');ownSelected(f,'not_committed');});
+test('a start the composer\'s boot-loop guard did not approve keeps the installed copy',function(){var f=fixture(),c=f.compose(),go=path.join(path.dirname(path.dirname(c.path)),'composer-run','go');fs.unlinkSync(go);ownSelected(f,'guard_not_approved');f.compose();fs.writeFileSync(go,'another composition\n');ownSelected(f,'guard_not_approved');});
 test('an unreadable record keeps the installed copy',function(){var f=fixture(),c=f.compose();fs.writeFileSync(path.join(path.dirname(c.path),'composed.json'),'{');ownSelected(f,'composition_unreadable');});
 test('a composition is never selected when the installed copy fails its checks',function(){var f=fixture();f.compose();f.data.originalHash='changed';var r=f.manager.prepare();assert.strictEqual(r.reason,'factory_hash_changed');assert(!f.selected());});
 test('a composition is never selected while disabled',function(){var f=fixture();f.compose();fs.writeFileSync(path.join(f.root,'disabled.json'),'{}');assert.strictEqual(f.manager.prepare().reason,'disabled');assert(!f.selected());});
